@@ -1,5 +1,7 @@
 # ESP32D2
 
+## Versão 0.1
+
 ### Um abajur acionado por palmas que toca MP3 acionado por sensor de presença que também tem sensor de temperatura. 
 
 Por enquanto é só um esboço e esqueleto do código. É um projeto que deve demorar, então não espere nada pronto com tanta urgência.
