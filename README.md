@@ -1,6 +1,6 @@
 # ESP32D2
 
-## Versão 0.1
+## Versão 0.2 - Acesso ao cartão micro sd funcionando. Consegue listar e contar arquivos em pastas. (Micro SD card access working. Can list and count files in folders.)
 
 ### Um abajur acionado por palmas que toca MP3 acionado por sensor de presença que também tem sensor de temperatura. 
 
