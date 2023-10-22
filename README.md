@@ -1,7 +1,8 @@
 # ESP32D2
 
-## Versão 0.4 - Acesso ao Micro SD Card, leitura de arquivo com dados para acesso a internet, leitura da pasta de músicas e gera playlist embaralhada de uma pasta específica. Já está conectando na internet ou gerando um Access Point caso não consiga se conectar a uma rede. Falta código para o amplificador, tocar músicas, criar tasks para usar o processador dual core e os sensores e leds. 
-## Version 0.4 - Access to the Micro SD Card, reading a file with data for internet access, reading the music folder and generating shuffled playlist from a specific folder. It is already connecting to the internet or generating an Access Point if it cannot connect to a network. There is no code for the amplifier, playing music, creating tasks to use the dual core processor and sensors and LEDs.
+## Versão 0.4 - Acesso ao Micro SD Card, leitura de arquivo com dados para acesso a internet, leitura da pasta de músicas e gera playlist embaralhada de uma pasta específica. Já está conectando na internet ou gerando um Access Point caso não consiga se conectar a uma rede. Falta melhorar o código de conexão para criar um Access Point caso passe mais de 1 minuto tentando conectar. O esboço dos tasks para usar o processador Dual Core já está funcionando, mas ainda falta melhorar algumas coias. Falta código para o amplificador, tocar músicas, os sensores e o led. 
+
+## Version 0.4 - Access to the Micro SD Card, reading a file with data for internet access, reading the music folder and generating shuffled playlist from a specific folder. It is already connecting to the internet or generating an Access Point if it cannot connect to a network. The connection code needs to be improved to create an Access Point if you spend more than 1 minute trying to connect. The outline of tasks for using the Dual Core processor is already working, but some things still need to be improved. There is no code for the amplifier, playing music, the sensors and the LED.
 
 ### Um abajur acionado por palmas que toca MP3 acionado por sensor de presença que também tem sensor de temperatura. 
 
