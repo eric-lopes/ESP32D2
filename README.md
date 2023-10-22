@@ -1,10 +1,22 @@
 # ESP32D2
 
-## Versão 0.3 - Acesso ao Micro SD Card, leitura de arquivo com dados da internet, leitura da pasta de músicas e gera playlists de uma pasta específica. Falta terminar a função de conexão a internet e iniciar o webserver. Ainda faltam, também, usar o amplificador, criar tasks para usar o processador dual core e os sensores e leds. (Access to the Micro SD Card, reading files with data from the internet, reading the music folder and generating playlists from a specific folder. It remains to finish the internet connection function and start the webserver. We also still need to use the amplifier, create tasks to use the dual core processor and the sensors and LEDs.)
+## Versão 0.4 - Acesso ao Micro SD Card, leitura de arquivo com dados para acesso a internet, leitura da pasta de músicas e gera playlist embaralhada de uma pasta específica. Já está conectando na internet ou gerando um Access Point caso não consiga se conectar a uma rede. Falta código para o amplificador, tocar músicas, criar tasks para usar o processador dual core e os sensores e leds. 
+## Version 0.4 - Access to the Micro SD Card, reading a file with data for internet access, reading the music folder and generating shuffled playlist from a specific folder. It is already connecting to the internet or generating an Access Point if it cannot connect to a network. There is no code for the amplifier, playing music, creating tasks to use the dual core processor and sensors and LEDs.
 
 ### Um abajur acionado por palmas que toca MP3 acionado por sensor de presença que também tem sensor de temperatura. 
 
-Por enquanto é só um esboço e esqueleto do código. É um projeto que deve demorar, então não espere nada pronto com tanta urgência.
+Código está em desenvolvimento. Acompanhe o andamento no anúncio de versão acima. Toda a parte eletrônica será montada em um R2-D2 feito de MDF 3mm e será usada como abajur e toca músicas!
+Estão sendo usados:
+| # | Itens |
+| --- | --- |
+| 1 | Esp32-Wroover 38 pinos |
+| 2 | Módulo de acesso a cartão micro sd |
+| 3 | Amplificador MAX98357a com um pequeno auto-falante |
+| 4 | Sensor PIR HC-SR501 |
+| 5 | LED RGB |
+| 6 | Sensor KY-037 |
+| 7 | Sensor DHT11 |
+
 
 
 
@@ -12,4 +24,14 @@ Por enquanto é só um esboço e esqueleto do código. É um projeto que deve de
 
 ### A lamp activated by clapping that plays MP3s activated by a presence sensor that also has a temperature sensor.
 
-For now it's just a sketch and skeleton of the code. It's a project that should take time, so don't expect anything to be ready so urgently. 
+Code is under development. Follow the progress in the release announcement above. All the electronics will be mounted on an R2-D2 made of 3mm MDF and will be used as a lamp and plays music!
+Are being used:
+| # | Items |
+| --- | --- |
+| 1 | Esp32-Wroover 38 pins |
+| 2 | Micro SD Card Access Module |
+| 3 | MAX98357a amplifier with a small speaker |
+| 4 | PIR sensor HC-SR501 |
+| 5 | RGB LED |
+| 6 | KY-037 sensor |
+| 7 | DHT11 sensor |
