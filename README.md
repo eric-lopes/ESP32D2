@@ -1,6 +1,6 @@
 # ESP32D2
 
-## Versão 0.2 - Acesso ao cartão micro sd funcionando. Consegue listar e contar arquivos em pastas. (Micro SD card access working. Can list and count files in folders.)
+## Versão 0.3 - Acesso ao Micro SD Card, leitura de arquivo com dados da internet, leitura da pasta de músicas e gera playlists de uma pasta específica. Falta terminar a função de conexão a internet e iniciar o webserver. Ainda faltam, também, usar o amplificador, criar tasks para usar o processador dual core e os sensores e leds. (Access to the Micro SD Card, reading files with data from the internet, reading the music folder and generating playlists from a specific folder. It remains to finish the internet connection function and start the webserver. We also still need to use the amplifier, create tasks to use the dual core processor and the sensors and LEDs.)
 
 ### Um abajur acionado por palmas que toca MP3 acionado por sensor de presença que também tem sensor de temperatura. 
 
