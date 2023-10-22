@@ -21,6 +21,9 @@ int numpasta=0;             //Armazena o Número de Pastas com Música
 String pastas[20];          //Armazena o caminho de cada pasta de música
 int nummusica=0;          //Armazena o número de músicas em uma pasta
 String musicas[30];        //Armazena uma lista embaralhada de músicas de uma pasta
+//Cria as Tasks para usar o dual core
+TaskHandle_t player;
+TaskHandle_t server;
 
 //Funções
 //Inicia o Cartão de Memória
@@ -77,22 +80,33 @@ void netstart() {
     }
   }
   if(stat==1) {
+    Serial.println("STA");
     int aux = redes[net].length()+1;
     char rede[aux];
     redes[net].toCharArray(rede,aux);
     aux = redes[net+1].length()+1;
     char senha[aux];
     redes[net+1].toCharArray(senha,aux);
+    Serial.println(rede);
+    Serial.println(senha);
+    delay(500);
     WiFi.begin(rede, senha);
+    Serial.println("begin");
     delay(5000);
+    Serial.println("delay");
     while (WiFi.status() != WL_CONNECTED) {
+      Serial.println(WiFi.status());
+      delay(500);
         if(WiFi.status()==6) {
           stat=0;
+          Serial.println("FODEU");
           break;
         }
     }
+  Serial.println("CLIENT");
   }
   if(stat==0) {
+    Serial.println("AP");
     WiFi.mode(WIFI_AP);
     WiFi.softAP("ESP32D2", "R2D2R2D2");
     delay(200);
@@ -175,7 +189,7 @@ void cria(fs::FS &fs, const char * path){
     Serial.println("Failed to open file for writing");
     return;
   }
-  if(file.print(redes[0])){
+  if(file.print("IOT\n")){
     Serial.println("File written");
   } 
   else {
@@ -183,14 +197,11 @@ void cria(fs::FS &fs, const char * path){
   }
   file.close();
   file = fs.open(path, FILE_APPEND);
-  for(int i=1;i<numrede;i++) {
-    if(file.print(redes[i])){
-      Serial.println("Message appended");
-    } 
-    else {
-      Serial.println("Append failed");
-    }  
-  }
+  file.print("@Xapeleta171171\n");
+  file.print("Nossa Internet\n");
+  file.print("@Xapeleta171171\n");
+  file.print("WiFi Router\n");
+  file.print("qwerty123\n");
   file.close();
 }
 
@@ -205,9 +216,13 @@ void renameFile(fs::FS &fs, const char * path1, const char * path2){
 
 //SETUP
 void setup() {
+  delay(500);
   Serial.begin(115200);
-  delay(1000);
+  delay(500);
+  WiFi.disconnect();
+  delay(500);
   sdstat=sdstart();
+  delay(500);
   if(sdstat==-1){
     Serial.println("Módulo Fodeu");
     //piscar led vermelho
@@ -217,7 +232,50 @@ void setup() {
     //piscar led verde
     //tocar som do R2-D2
     numrede=netread(SD);
+    delay(500);
     netstart();
+  }
+
+  xTaskCreatePinnedToCore(
+                    playercode,   /* Task function. */
+                    "Player",     /* name of task. */
+                    10000,       /* Stack size of task */
+                    NULL,        /* parameter of the task */
+                    1,           /* priority of the task */
+                    &player,      /* Task handle to keep track of created task */
+                    0);          /* pin task to core 0 */                  
+  delay(500); 
+
+  //create a task that will be executed in the Task2code() function, with priority 1 and executed on core 1
+  xTaskCreatePinnedToCore(
+                    servercode,   /* Task function. */
+                    "Server",     /* name of task. */
+                    10000,       /* Stack size of task */
+                    NULL,        /* parameter of the task */
+                    1,           /* priority of the task */
+                    &server,      /* Task handle to keep track of created task */
+                    1);          /* pin task to core 1 */
+    delay(500); 
+
+}
+
+//Código para ser usado no Task Player
+void playercode( void * pvParameters ) {
+  Serial.print("Player running on core ");
+  Serial.println(xPortGetCoreID());
+  for(int i=0; i>-1; i++) {
+    Serial.println("Player rodando");
+    delay(1000);  
+  }
+}
+
+//Código para ser usado no Task Server
+void servercode( void * pvParameters ){
+  Serial.print("Server running on core ");
+  Serial.println(xPortGetCoreID());
+  for(int i=0;i>-1;i++){
+    Serial.println("Server rodando");
+    delay(500);
   }
 }
 
