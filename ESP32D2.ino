@@ -13,107 +13,173 @@ MISO = GPIO19
 VCC  = V5
 GND  = GND */
 
-
 //Variáveis Globais
-char* rede[5];
-char* senha[5];
-String net[5];
-String pass[5];
+int sdstat=0;        //Status do Cartão de Memória
+int numrede=0;       //Armazena o número de redes e senhas
+String redes[10];    //Armazena SSIDs e Senhas das redes (Até o máximo de 5 redes e senhas)
+int numpasta=0;      //Armazena o Número de Pastas com Música
+String pastas[20];   //Armazena o caminho de cada pasta de música
+int numplaylist=0;   //Armazena o número de músicas em uma pasta
+String playlist[30]; //Armazena uma lista embaralhada de músicas de uma pasta
+
+String teste[50];
 
 //Funções
-
-void netread() {
-//wifi.net  
+//Inicia o Cartão de Memória
+int sdstart() {
+  if(!SD.begin()){
+    return -1; //Retorna -1 se houver erro
+  }
+  uint64_t cardSize = SD.cardSize() / (1024 * 1024); //Informa o tamanho do cartão.
+  return 1;
 }
 
-void netsave() {
-//só pra tentar escrever algo caso precise
+//Lê o arquivo com as redes
+int netread(fs::FS &fs){
+  int a=0;
+  File file = fs.open("/wifi.net");
+  if(!file){
+    return 0; //Retorna 0 se não houver o arquivo
+  }
+  while(file.available()){
+    redes[a] = file.readStringUntil('\n'); 
+    a++;
+  }
+  file.close();
+  return a; //Retorna o número de strings lidas (deve ser par)
 }
 
-void wfcnt() {
-//netread
-//começa com STA
-//tenta conectar
-//se não conectar, troca para AP
+//Faz a conexão com a internet ou cria um Access Point
+void netstart() {
+  int stat=2;
+  int net=0;
+  if(numrede==0) {
+    stat=0;
+    Serial.println("Sem arquivo, sem rede");
+  }
+  else{
+    WiFi.mode(WIFI_STA);
+    WiFi.disconnect();
+    delay(1000);
+    Serial.println("Inicio do Wifi");
+    int n = WiFi.scanNetworks();
+    Serial.println("scan done");
+    if (n == 0) {
+      Serial.println("no networks found");
+      stat=0;
+    } 
+    else {
+      Serial.print(n);
+      Serial.println(" networks found");
+      for (int i = 0; i < n && stat!=1; ++i) {
+        Serial.print("i=");
+        Serial.println(i);
+        Serial.println(WiFi.SSID(i));
+        delay(1000);
+        for(int j=0; j<numrede && stat!=1;j+=2) {
+          Serial.print("j=");
+          Serial.println(j);
+          Serial.println(redes[j]);
+          delay(500);
+          if(WiFi.SSID(i)==redes[j]) {
+            net=j;
+            stat=1;
+            Serial.println("ACHEI");
+            Serial.print("stat=");
+            Serial.println(stat);
+            Serial.print("net=");
+            Serial.println(net);
+            Serial.print("SSID=");
+            Serial.println(WiFi.SSID(i));
+            Serial.print("REDE=");
+            Serial.println(redes[net]);
+          }
+            else {
+            Serial.println("Procurando");
+            stat=0;
+          }
+        }
+      }
+    }
+  } //Termina o scan da rede
+  Serial.println("********************************");
+  Serial.print("stat=");
+  Serial.println(stat);
+  Serial.print("REDE=");
+  Serial.println(redes[net]);
+  Serial.println(redes[net+1]);
+
+  if(stat==0) {
+    Serial.println("Iniciar AP");
+  }
+  else {
+    Serial.println("Iniciar Client");
+  }
+}
+//Lê as pastas na pasta Music
+int pastaread(fs::FS &fs){
+  int a=0;
+  File music = fs.open("/Music");
+  if(!music){
+    return 0;
+  }
+  if(!music.isDirectory()){
+    return -1;
+  }
+
+  File file = music.openNextFile();
+  while(file){
+    if(file.isDirectory()){
+      pastas[a]=file.name();
+      a++;
+    }  
+    file = music.openNextFile();
+  }
+  return a;
+}
+//Lê as músicas dentro de uma pasta
+int musicaread(fs::FS &fs,int p){
+    int a=0;
+    File root = fs.open(pastas[p]);
+    if(!root){
+        return 0;
+    }
+    if(!root.isDirectory()){
+        return -1;
+    }
+
+    File file = root.openNextFile();
+    while(file){
+        if(!file.isDirectory()){
+            playlist[a]=file.name();
+            a++;
+        }
+        file = root.openNextFile();
+    }
+  for(int b=0;b<a;b++) {
+    int r=random(b,a);
+    String music=playlist[b];
+    playlist[b]=playlist[r];
+    playlist[r]=music;
+  }
+  return a;
 }
 
+
+//Criar os dois tasks pra usar os dois núcleos
+
+
+//Toca Música
+void play() {
+    numpasta=pastaread(SD);   
+}
 
 void websrv () {
 //cria um simples web server
 //liga led e apaga led
 }
 
-
-//Criar os dois tasks pra usar os dois núcleos
-
 //Funções Transitórias
-void listDir(fs::FS &fs, const char * dirname){
-    int count=0;
-    Serial.printf("Listing directory: %s\n", dirname);
-
-    File root = fs.open(dirname);
-    if(!root){
-        Serial.println("Failed to open directory");
-        return;
-    }
-    if(!root.isDirectory()){
-        Serial.println("Not a directory");
-        return;
-    }
-
-    File file = root.openNextFile();
-    while(file){
-        if(file.isDirectory()){
-            Serial.print("  DIR : ");
-            Serial.println(file.name());
-        } else {
-            Serial.print("  FILE: ");
-            Serial.print(file.name());
-            Serial.print("  SIZE: ");
-            Serial.println(file.size());
-            count++;
-        }
-        file = root.openNextFile();
-    }
-    Serial.print(" Arquivos: ");
-    Serial.println(count);
-}
-
-int lendir(fs::FS &fs, const char * dirname){
-  int count=0;
-  File root = fs.open(dirname);
-  if(!root){
-    return 0;
-    }
-  if(!root.isDirectory()){
-    return -1;
-    }
-
-  File file = root.openNextFile();
-  while(file){
-    if(!file.isDirectory()){
-      count++;
-    }
-  file = root.openNextFile();
-  }
-  return count; 
-}
-
-void readFile(fs::FS &fs, const char * path){
-    Serial.printf("Reading file: %s\n", path);
-
-    File file = fs.open(path);
-    if(!file){
-        Serial.println("Failed to open file for reading");
-        return;
-    }
-
-    Serial.print("Read from file: ");
-    while(file.available()){
-        Serial.write(file.read());
-    }
-    file.close();
-}
 
 void writeFile(fs::FS &fs, const char * path, const char * message){
     Serial.printf("Writing file: %s\n", path);
@@ -158,66 +224,25 @@ void renameFile(fs::FS &fs, const char * path1, const char * path2){
 
 //SETUP
 void setup() {
-
-  /*Serial.begin(115200);
-  Serial.setDebugOutput(true);
-  WiFi.disconnect();
+  Serial.begin(115200);
   delay(1000);
-  WiFi.begin(rede[0], senha[0]);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-  }*/
-
-Serial.begin(115200);
-    if(!SD.begin()){
-        Serial.println("Card Mount Failed");
-        return;
-    }
-    uint8_t cardType = SD.cardType();
-
-    if(cardType == CARD_NONE){
-        Serial.println("No SD card attached");
-        return;
-    }
-
-    Serial.print("SD Card Type: ");
-    if(cardType == CARD_MMC){
-        Serial.println("MMC");
-    } else if(cardType == CARD_SD){
-        Serial.println("SDSC");
-    } else if(cardType == CARD_SDHC){
-        Serial.println("SDHC");
-    } else {
-        Serial.println("UNKNOWN");
-    }
-
-    uint64_t cardSize = SD.cardSize() / (1024 * 1024);
-    Serial.printf("SD Card Size: %lluMB\n", cardSize);
-
+  sdstat=sdstart();
+  if(sdstat==-1){
+    Serial.println("Módulo Fodeu");
+    //piscar led vermelho
+  } 
+  else {
+    Serial.println("Cartão ok");
+    //piscar led verde
+    //tocar som do R2-D2
+    numrede=netread(SD);
+    netstart();
+  }
+   
 }
 
 void loop() {
- readFile(SD, "/hello.txt");
- writeFile(SD, "/hello.txt", "Hello ");
- appendFile(SD, "/hello.txt", "World!\n");
- renameFile(SD, "/hello.txt", "/foo.txt");
- Serial.printf("Total space: %lluMB\n", SD.totalBytes() / (1024 * 1024));
- Serial.printf("Used space: %lluMB\n", SD.usedBytes() / (1024 * 1024));
- readFile(SD,"/teste/numline");
- listDir(SD, "/R2D2");
- delay(3000);
- Serial.println();
- Serial.printf("Arquivos em R2D2: ");
- Serial.println(lendir(SD,"/R2D2")); 
- Serial.println();
- Serial.printf("Arquivos em BB8: ");
- Serial.println(lendir(SD,"/BB8")); 
- Serial.println();
- Serial.printf("Arquivos em foo.txt: ");
- Serial.println(lendir(SD,"/foo.txt"));
- Serial.println();
- Serial.println("*************************");
- Serial.println(); 
- delay(15000);
-
+  delay(2000);
+  Serial.println("Working..."); 
+  delay(8000);
 }
