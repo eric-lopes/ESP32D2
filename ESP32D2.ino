@@ -181,10 +181,6 @@ void cria(fs::FS &fs, const char * path){
   file.close();
   file = fs.open(path, FILE_APPEND);
   file.print("@Xapeleta171171\n");
-  file.print("Nossa Internet\n");
-  file.print("@Xapeleta171171\n");
-  file.print("WiFi Router\n");
-  file.print("qwerty123\n");
   file.close();
 }
 
@@ -194,6 +190,15 @@ void renameFile(fs::FS &fs, const char * path1, const char * path2){
         Serial.println("File renamed");
     } else {
         Serial.println("Rename failed");
+    }
+}
+
+void deleteFile(fs::FS &fs, const char * path){
+    Serial.printf("Deleting file: %s\n", path);
+    if(fs.remove(path)){
+        Serial.println("File deleted");
+    } else {
+        Serial.println("Delete failed");
     }
 }
 
