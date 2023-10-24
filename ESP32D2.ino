@@ -1,7 +1,7 @@
 //Bibliotecas Utilizadas
 //Para usar Wi-Fi
 #include <WiFi.h>
-//Para fazer usar o cartão micro sd
+//Para usar o cartão micro sd
 #include "FS.h"
 #include "SD.h"
 #include "SPI.h"
@@ -19,29 +19,23 @@ int numrede=0;              //Armazena o número de redes e senhas
 String redes[10];           //Armazena SSIDs e Senhas das redes (Até o máximo de 5 redes e senhas)
 int numpasta=0;             //Armazena o Número de Pastas com Música
 String pastas[20];          //Armazena o caminho de cada pasta de música
-int nummusica=0;          //Armazena o número de músicas em uma pasta
-String musicas[30];        //Armazena uma lista embaralhada de músicas de uma pasta
+int nummusica=0;            //Armazena o número de músicas em uma pasta
+String musicas[30];         //Armazena uma lista embaralhada de músicas de uma pasta
 //Cria as Tasks para usar o dual core
-TaskHandle_t player;
-TaskHandle_t server;
+TaskHandle_t player, server;
 
 //Funções
 //Inicia o Cartão de Memória
 int sdstart() {
-  if(!SD.begin()){
-    return -1; //Retorna -1 se houver erro
-  }
-  //uint64_t cardSize = SD.cardSize() / (1024 * 1024); //Informa o tamanho do cartão.
-  return 1;
+  if(SD.begin()){return 1;} //Retorna 1 se o cartão iniciar corretamente
+  else{return 0;} //Retorna 0 se ocorrer algum erro
 }
 
 //Lê o arquivo com as redes
 int netread(fs::FS &fs){
   int a=0;
   File file = fs.open("/wifi.net");
-  if(!file){
-    return 0; //Retorna 0 se não houver o arquivo
-  }
+  if(!file){return 0;} //Retorna 0 se não houver o arquivo
   while(file.available()){
     redes[a] = file.readStringUntil('\n'); 
     a++;
@@ -52,58 +46,49 @@ int netread(fs::FS &fs){
 
 //Faz a conexão com a internet ou cria um Access Point
 void netstart() {
-  int stat=2;
-  int net=0;
-  if(numrede==0) {
-    stat=0;
-  }
-  else{
+  int stat=0, net=0;
+  //Se existir redes cadastradas, scaneia e tenta conectar
+  if(numrede!=0) {
     WiFi.mode(WIFI_STA);
     WiFi.disconnect();
     delay(1000);
-    int n = WiFi.scanNetworks();
-    if (n == 0) {
-      stat=0;
-    } 
-    else {
+    int n = WiFi.scanNetworks(); 
+    if(n!=0) {
       for (int i = 0; i < n && stat!=1; ++i) {
         for(net=0; net<numrede && stat!=1;net+=2) {
           if(WiFi.SSID(i)==redes[net]) {
             stat=1;
             break;
           }
-          else {
-            stat=0;
-          }
         }
       }
     }
   }
   if(stat==1) {
-    Serial.println("STA");
     int aux = redes[net].length()+1;
     char rede[aux];
     redes[net].toCharArray(rede,aux);
     aux = redes[net+1].length()+1;
     char senha[aux];
     redes[net+1].toCharArray(senha,aux);
-    Serial.println(rede);
-    Serial.println(senha);
     delay(500);
     WiFi.begin(rede, senha);
     Serial.println("begin");
     delay(5000);
     Serial.println("delay");
+    unsigned long milistart=millis();
+    unsigned long miliend=millis();
     while (WiFi.status() != WL_CONNECTED) {
       Serial.println(WiFi.status());
       delay(500);
-        if(WiFi.status()==6) {
+      miliend=millis();
+        if(WiFi.status()==6 || miliend-milistart>=30000) {
           stat=0;
           Serial.println("FODEU");
           break;
         }
     }
-  Serial.println("CLIENT");
+    Serial.println("CLIENT");
   }
   if(stat==0) {
     Serial.println("AP");
@@ -115,6 +100,7 @@ void netstart() {
     WiFi.softAPConfig(Ip, Ip, NMask);
   }
 }
+
 //Lê as pastas na pasta Music
 int pastaread(fs::FS &fs){
   int a=0;
@@ -136,6 +122,7 @@ int pastaread(fs::FS &fs){
   }
   return a;
 }
+
 //Lê as músicas dentro de uma pasta e gera uma lista embaralhada
 int musicaread(fs::FS &fs,int p){
     int a=0;
@@ -163,10 +150,6 @@ int musicaread(fs::FS &fs,int p){
   }
   return a;
 }
-
-
-//Criar os dois tasks pra usar os dois núcleos
-
 
 //Toca Música
 void play() {
@@ -218,12 +201,10 @@ void renameFile(fs::FS &fs, const char * path1, const char * path2){
 void setup() {
   delay(500);
   Serial.begin(115200);
-  delay(500);
   WiFi.disconnect();
-  delay(500);
   sdstat=sdstart();
   delay(500);
-  if(sdstat==-1){
+  if(sdstat==0){
     Serial.println("Módulo Fodeu");
     //piscar led vermelho
   } 
@@ -235,52 +216,30 @@ void setup() {
     delay(500);
     netstart();
   }
-
-  xTaskCreatePinnedToCore(
-                    playercode,   /* Task function. */
-                    "Player",     /* name of task. */
-                    10000,       /* Stack size of task */
-                    NULL,        /* parameter of the task */
-                    1,           /* priority of the task */
-                    &player,      /* Task handle to keep track of created task */
-                    0);          /* pin task to core 0 */                  
+  //Parâmetros: (Função executada, nome do Taskm, Tamanho da Pilha, Parâmetros da Tarefa, Prioridade, TaskHandler criado, core)
+  xTaskCreatePinnedToCore(playercode, "Player", 10000, NULL, 1, &player, 0); 
   delay(500); 
-
-  //create a task that will be executed in the Task2code() function, with priority 1 and executed on core 1
-  xTaskCreatePinnedToCore(
-                    servercode,   /* Task function. */
-                    "Server",     /* name of task. */
-                    10000,       /* Stack size of task */
-                    NULL,        /* parameter of the task */
-                    1,           /* priority of the task */
-                    &server,      /* Task handle to keep track of created task */
-                    1);          /* pin task to core 1 */
-    delay(500); 
-
+  xTaskCreatePinnedToCore(servercode, "Server", 10000, NULL, 1, &server, 1); 
+  delay(500); 
 }
 
 //Código para ser usado no Task Player
 void playercode( void * pvParameters ) {
-  Serial.print("Player running on core ");
-  Serial.println(xPortGetCoreID());
   for(int i=0; i>-1; i++) {
-    Serial.println("Player rodando");
+    Serial.print("Player running on core ");
+    Serial.println(xPortGetCoreID());
     delay(1000);  
   }
 }
 
 //Código para ser usado no Task Server
 void servercode( void * pvParameters ){
-  Serial.print("Server running on core ");
-  Serial.println(xPortGetCoreID());
-  for(int i=0;i>-1;i++){
-    Serial.println("Server rodando");
+    for(int i=0;i>-1;i++){
+    Serial.print("Server running on core ");
+    Serial.println(xPortGetCoreID());
     delay(500);
   }
 }
 
 void loop() {
-  delay(2000);
-  Serial.println("Working..."); 
-  delay(8000);
 }
