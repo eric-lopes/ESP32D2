@@ -76,6 +76,7 @@ void netstart() {
     }
   }
   if(stat==1) {
+    WiFi.mode(WIFI_AP_STA);
     int aux = redes[net].length()+1;
     char rede[aux];
     redes[net].toCharArray(rede,aux);
@@ -99,6 +100,12 @@ void netstart() {
         }
     }
     Serial.println("CLIENT");
+    WiFi.softAP("ESP32D2", "R2D2R2D2");
+    delay(200);
+    IPAddress Ip(192, 168, 5, 7);
+    IPAddress NMask(255, 255, 255, 0);
+    WiFi.softAPConfig(Ip, Ip, NMask);
+    Serial.println("CLIENT e AP");
   }
   if(stat==0) {
     Serial.println("AP");
