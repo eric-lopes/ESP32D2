@@ -12,6 +12,11 @@ MOSI = GPIO23
 MISO = GPIO19
 VCC  = V5
 GND  = GND */
+//Para usar o Web Server
+#include <ESP32WebServer.h>
+#include "CSS.h"
+//Para usar o DHT11
+#include "DHT.h"
 
 //Variáveis Globais
 int sdstat=0;               //Status do Cartão de Memória
@@ -23,6 +28,12 @@ int nummusica=0;            //Armazena o número de músicas em uma pasta
 String musicas[30];         //Armazena uma lista embaralhada de músicas de uma pasta
 //Cria as Tasks para usar o dual core
 TaskHandle_t player, server;
+
+ESP32WebServer web(80);
+
+/*#define DHTTYPE DHT11
+#define DHTPIN 4
+DHT dht(DHTPIN, DHTTYPE);*/
 
 //Funções
 //Inicia o Cartão de Memória
@@ -71,7 +82,6 @@ void netstart() {
     aux = redes[net+1].length()+1;
     char senha[aux];
     redes[net+1].toCharArray(senha,aux);
-    delay(500);
     WiFi.begin(rede, senha);
     Serial.println("begin");
     delay(5000);
@@ -163,6 +173,107 @@ void websrv () {
 //liga led e apaga led
 }
 
+/*void dht() {
+  float h = dht.readHumidity();
+  // Read temperature as Celsius (the default)
+  float t = dht.readTemperature();
+  // Check if any reads failed and exit early (to try again).
+  if (isnan(h) || isnan(t) || isnan(f)) {
+    Serial.println(F("Failed to read from DHT sensor!"));
+    return;
+  }
+  // Compute heat index in Celsius (isFahreheit = false)
+  float hic = dht.computeHeatIndex(t, h, false);
+
+  Serial.print(F("Humidity: "));
+  Serial.print(h);
+  Serial.print(F("%  Temperature: "));
+  Serial.print(t);
+  Serial.print(F("°C "));
+  Serial.print(F(" Heat index: "));
+  Serial.print(hic);
+  Serial.print(F("°C "));
+}*/
+
+void SendHTML_Header()
+{
+  web.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate"); 
+  web.sendHeader("Pragma", "no-cache"); 
+  web.sendHeader("Expires", "-1"); 
+  web.setContentLength(CONTENT_LENGTH_UNKNOWN); 
+  web.send(200, "text/html", ""); //Empty content inhibits Content-length header so we have to close the socket ourselves. 
+  append_page_header();
+  web.sendContent(webpage);
+  webpage = "";
+}
+
+void SendHTML_Content()
+{
+  web.sendContent(webpage);
+  webpage = "";
+}
+
+void SendHTML_Stop()
+{
+  web.sendContent("");
+  web.client().stop(); //Stop is needed because no content length was sent
+}
+
+void SD_dir() {
+  //Action acording to post, dowload or delete, by MC 2022
+  if (web.args() > 0 ) //Arguments were received, ignored if there are not arguments
+    { 
+      Serial.println(web.arg(0));
+  
+      String Order = web.arg(0);
+      Serial.println(Order);
+      
+      if (Order.indexOf("download_")>=0)
+      {
+        Order.remove(0,9);
+        //SD_file_download(Order);
+        Serial.println(Order);
+      }
+  
+      if ((web.arg(0)).indexOf("delete_")>=0)
+      {
+        Order.remove(0,7);
+        //SD_file_delete(Order);
+        Serial.println(Order);
+      }
+    }
+
+    File root = SD.open("/");
+    if (root) {
+      root.rewindDirectory();
+      SendHTML_Header();    
+      webpage += F("<table align='center'>");
+      webpage += F("<tr><th>Name/Type</th><th style='width:20%'>Type File/Dir</th><th>File Size</th></tr>");
+      //printDirectory("/",0);
+      webpage += F("</table>");
+      SendHTML_Content();
+      root.close();
+    }
+    else 
+    {
+      SendHTML_Header();
+      webpage += F("<h3>No Files Found</h3>");
+    }
+    append_page_footer();
+    SendHTML_Content();
+    SendHTML_Stop();   //Stop is needed because no content length was sent
+
+}
+
+
+
+void File_Upload() {
+  
+}
+
+void handleFileUpload() {
+  
+}
 //Funções Transitórias
 
 void cria(fs::FS &fs, const char * path){
@@ -221,6 +332,14 @@ void setup() {
     delay(500);
     netstart();
   }
+  //dht.begin();
+  
+  /*********  Server Commands  **********/
+  web.on("/",         SD_dir);
+  web.on("/upload",   File_Upload);
+  web.on("/fupload",  HTTP_POST,[](){ web.send(200);}, handleFileUpload);
+  
+  web.begin();
   //Parâmetros: (Função executada, nome do Taskm, Tamanho da Pilha, Parâmetros da Tarefa, Prioridade, TaskHandler criado, core)
   xTaskCreatePinnedToCore(playercode, "Player", 10000, NULL, 1, &player, 0); 
   delay(500); 
@@ -230,7 +349,7 @@ void setup() {
 
 //Código para ser usado no Task Player
 void playercode( void * pvParameters ) {
-  for(int i=0; i>-1; i++) {
+  while(true) {
     Serial.print("Player running on core ");
     Serial.println(xPortGetCoreID());
     delay(1000);  
@@ -239,7 +358,8 @@ void playercode( void * pvParameters ) {
 
 //Código para ser usado no Task Server
 void servercode( void * pvParameters ){
-    for(int i=0;i>-1;i++){
+    while(true){
+    web.handleClient();
     Serial.print("Server running on core ");
     Serial.println(xPortGetCoreID());
     delay(500);
