@@ -14,7 +14,8 @@ VCC  = V5
 GND  = GND */
 //Para usar o Web Server
 #include <ESP32WebServer.h>
-#include "CSS.h"
+#include <base64.h>
+#include "HTML.h"
 //Para usar o DHT11
 #include "DHT.h"
 
@@ -27,10 +28,9 @@ String pastas[20];          //Armazena o caminho de cada pasta de música
 int nummusica=0;            //Armazena o número de músicas em uma pasta
 String musicas[30];         //Armazena uma lista embaralhada de músicas de uma pasta
 //Cria as Tasks para usar o dual core
-TaskHandle_t player, server;
+TaskHandle_t player;
 
 ESP32WebServer web(80);
-
 /*#define DHTTYPE DHT11
 #define DHTPIN 4
 DHT dht(DHTPIN, DHTTYPE);*/
@@ -58,11 +58,9 @@ int netread(fs::FS &fs){
 //Faz a conexão com a internet ou cria um Access Point
 void netstart() {
   int stat=0, net=0;
+  WiFi.mode(WIFI_AP_STA);
   //Se existir redes cadastradas, scaneia e tenta conectar
   if(numrede!=0) {
-    WiFi.mode(WIFI_STA);
-    WiFi.disconnect();
-    delay(1000);
     int n = WiFi.scanNetworks(); 
     if(n!=0) {
       for (int i = 0; i < n && stat!=1; ++i) {
@@ -76,7 +74,6 @@ void netstart() {
     }
   }
   if(stat==1) {
-    WiFi.mode(WIFI_AP_STA);
     int aux = redes[net].length()+1;
     char rede[aux];
     redes[net].toCharArray(rede,aux);
@@ -84,38 +81,21 @@ void netstart() {
     char senha[aux];
     redes[net+1].toCharArray(senha,aux);
     WiFi.begin(rede, senha);
-    Serial.println("begin");
     delay(5000);
-    Serial.println("delay");
-    unsigned long milistart=millis();
-    unsigned long miliend=millis();
+    unsigned long milistart=millis(), miliend=millis();
     while (WiFi.status() != WL_CONNECTED) {
-      Serial.println(WiFi.status());
-      delay(500);
+      delay(1000);
       miliend=millis();
-        if(WiFi.status()==6 || miliend-milistart>=30000) {
-          stat=0;
-          Serial.println("FODEU");
-          break;
-        }
+      if(WiFi.status()==6 || miliend-milistart>=30000) {
+        break;
+      }
     }
-    Serial.println("CLIENT");
-    WiFi.softAP("ESP32D2", "R2D2R2D2");
-    delay(200);
-    IPAddress Ip(192, 168, 5, 7);
-    IPAddress NMask(255, 255, 255, 0);
-    WiFi.softAPConfig(Ip, Ip, NMask);
-    Serial.println("CLIENT e AP");
-  }
-  if(stat==0) {
-    Serial.println("AP");
-    WiFi.mode(WIFI_AP);
-    WiFi.softAP("ESP32D2", "R2D2R2D2");
-    delay(200);
-    IPAddress Ip(192, 168, 5, 7);
-    IPAddress NMask(255, 255, 255, 0);
-    WiFi.softAPConfig(Ip, Ip, NMask);
-  }
+  }  
+  WiFi.softAP("ESP32D2", "R2D2R2D2");
+  delay(200);
+  IPAddress Ip(192, 168, 5, 7);
+  IPAddress NMask(255, 255, 255, 0);
+  WiFi.softAPConfig(Ip, Ip, NMask);
 }
 
 //Lê as pastas na pasta Music
@@ -175,17 +155,11 @@ void play() {
   nummusica=musicaread(SD,a);   
 }
 
-void websrv () {
-//cria um simples web server
-//liga led e apaga led
-}
 
 /*void dht() {
   float h = dht.readHumidity();
-  // Read temperature as Celsius (the default)
   float t = dht.readTemperature();
-  // Check if any reads failed and exit early (to try again).
-  if (isnan(h) || isnan(t) || isnan(f)) {
+  if (isnan(h) || isnan(t)) {
     Serial.println(F("Failed to read from DHT sensor!"));
     return;
   }
@@ -202,8 +176,7 @@ void websrv () {
   Serial.print(F("°C "));
 }*/
 
-void SendHTML_Header()
-{
+void SendHTML_Header() {
   web.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate"); 
   web.sendHeader("Pragma", "no-cache"); 
   web.sendHeader("Expires", "-1"); 
@@ -214,46 +187,37 @@ void SendHTML_Header()
   webpage = "";
 }
 
-void SendHTML_Content()
-{
+void SendHTML_Content(){
   web.sendContent(webpage);
   webpage = "";
 }
 
-void SendHTML_Stop()
-{
+void SendHTML_Stop(){
   web.sendContent("");
   web.client().stop(); //Stop is needed because no content length was sent
 }
 
 void SD_dir() {
   //Action acording to post, dowload or delete, by MC 2022
-  if (web.args() > 0 ) //Arguments were received, ignored if there are not arguments
-    { 
-      Serial.println(web.arg(0));
-  
-      String Order = web.arg(0);
-      Serial.println(Order);
-      
-      if (Order.indexOf("download_")>=0)
-      {
+  if (web.args() > 0 ){  //Arguments were received, ignored if there are not arguments
+    Serial.println(web.arg(0));
+    String Order = web.arg(0);
+    Serial.println(Order);
+      if (Order.indexOf("download_")>=0){
         Order.remove(0,9);
         //SD_file_download(Order);
         Serial.println(Order);
       }
-  
-      if ((web.arg(0)).indexOf("delete_")>=0)
-      {
+      if ((web.arg(0)).indexOf("delete_")>=0){
         Order.remove(0,7);
         //SD_file_delete(Order);
         Serial.println(Order);
       }
     }
-
     File root = SD.open("/");
     if (root) {
       root.rewindDirectory();
-      SendHTML_Header();    
+      SendHTML_Header();
       webpage += F("<table align='center'>");
       webpage += F("<tr><th>Name/Type</th><th style='width:20%'>Type File/Dir</th><th>File Size</th></tr>");
       //printDirectory("/",0);
@@ -261,18 +225,14 @@ void SD_dir() {
       SendHTML_Content();
       root.close();
     }
-    else 
-    {
+    else {
       SendHTML_Header();
       webpage += F("<h3>No Files Found</h3>");
     }
     append_page_footer();
     SendHTML_Content();
     SendHTML_Stop();   //Stop is needed because no content length was sent
-
 }
-
-
 
 void File_Upload() {
   
@@ -281,8 +241,8 @@ void File_Upload() {
 void handleFileUpload() {
   
 }
-//Funções Transitórias
 
+//Funções Transitórias
 void cria(fs::FS &fs, const char * path){
   Serial.printf("Writing file: %s\n", path);
   File file = fs.open(path, FILE_WRITE);
@@ -320,6 +280,37 @@ void deleteFile(fs::FS &fs, const char * path){
     }
 }
 
+void ls(fs::FS &fs, const char * dirname, uint8_t levels){
+    Serial.printf("Listing directory: %s\n", dirname);
+
+    File root = fs.open(dirname);
+    if(!root){
+        Serial.println("Failed to open directory");
+        return;
+    }
+    if(!root.isDirectory()){
+        Serial.println("Not a directory");
+        return;
+    }
+
+    File file = root.openNextFile();
+    while(file){
+        if(file.isDirectory()){
+            Serial.print("  DIR : ");
+            Serial.println(file.name());
+            if(levels){
+                ls(fs, file.name(), levels -1);
+            }
+        } else {
+            Serial.print("  FILE: ");
+            Serial.print(file.name());
+            Serial.print("  SIZE: ");
+            Serial.println(file.size());
+        }
+        file = root.openNextFile();
+    }
+}
+
 //SETUP
 void setup() {
   delay(500);
@@ -336,22 +327,21 @@ void setup() {
     //piscar led verde
     //tocar som do R2-D2
     numrede=netread(SD);
-    delay(500);
-    netstart();
   }
+  netstart();
   //dht.begin();
+  Serial.println(WiFi.localIP()); 
+  delay(1000);
   
   /*********  Server Commands  **********/
   web.on("/",         SD_dir);
-  web.on("/upload",   File_Upload);
-  web.on("/fupload",  HTTP_POST,[](){ web.send(200);}, handleFileUpload);
-  
+  //web.on("/upload",   File_Upload);
+  //web.on("/fupload",  HTTP_POST,[](){ web.send(200);}, handleFileUpload);
+
   web.begin();
   //Parâmetros: (Função executada, nome do Taskm, Tamanho da Pilha, Parâmetros da Tarefa, Prioridade, TaskHandler criado, core)
   xTaskCreatePinnedToCore(playercode, "Player", 10000, NULL, 1, &player, 0); 
-  delay(500); 
-  xTaskCreatePinnedToCore(servercode, "Server", 10000, NULL, 1, &server, 1); 
-  delay(500); 
+  delay(500);
 }
 
 //Código para ser usado no Task Player
@@ -359,19 +349,13 @@ void playercode( void * pvParameters ) {
   while(true) {
     Serial.print("Player running on core ");
     Serial.println(xPortGetCoreID());
-    delay(1000);  
-  }
-}
-
-//Código para ser usado no Task Server
-void servercode( void * pvParameters ){
-    while(true){
-    web.handleClient();
-    Serial.print("Server running on core ");
-    Serial.println(xPortGetCoreID());
-    delay(500);
+    delay(5000);  
   }
 }
 
 void loop() {
+  web.handleClient();
+  Serial.print("Server running on core ");
+  Serial.println(xPortGetCoreID());
+  delay(500);
 }
