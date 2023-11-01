@@ -29,41 +29,6 @@ void append_page_header() {
   webpage += F("p{font-size:75%;}");  
   webpage += F("</style></head>");
   webpage += F("<body>");
-  //webpage += F("<div style='text-align: center;'>");
-  //webpage += F("<img src='/Icon.jpeg' alt='R2-D2'>");
-  //webpage += F("</div>");
-  
-  
-  File imageFile = SD.open("/Icon.jpeg", "r");
-  if (!imageFile) {
-    Serial.println("Falha ao abrir o arquivo de imagem");
-    return;
-  }
-
-  // Obter o tamanho do arquivo de imagem
-  size_t imageSize = imageFile.size();
-
-  // Criar um buffer para armazenar os dados da imagem
-  uint8_t* imageBuffer = new uint8_t[imageSize];
-  
-  // Ler os dados da imagem para o buffer
-  imageFile.read(imageBuffer, imageSize);
-
-  // Fechar o arquivo de imagem
-  imageFile.close();
-
-  // Converter os dados da imagem em uma string base64
-  String base64Image = base64::encode(imageBuffer, imageSize);
-
-  // Adicionar a tag <img> com o atributo src contendo a string base64 da imagem
-  webpage += F("<div style='text-align: center;'>");
-  webpage += "<img src='data:image/jpeg;base64," + base64Image + "'>";
-  webpage += F("</div>");
-  // Restante do código para gerar a página inicial
-
-  delete[] imageBuffer;
-  
-  
   webpage += F("<h1>ESP32-D2</h1>");
   char ipString[16];
   WiFi.localIP().toString().toCharArray(ipString, 16);
@@ -74,9 +39,8 @@ void append_page_header() {
   webpage += F("<li><a href='/'>Músicas</a></li>");
   webpage += F("<li><a href='/upload'>Abajur</a></li>   ");
   webpage += F("<li><a href='/upload'>Redes</a></li>");   
-  webpage += F("</ul>");  
-
-}
+  webpage += F("</ul>");
+  }
 //Saves repeating many lines of code for HTML page footers
 void append_page_footer()
 { 
