@@ -1,6 +1,6 @@
-//Inicia o Servidor
-ESP32WebServer web(80);
 #include "HTML.h"
+
+ESP32WebServer web(80);
 
 void SendHTML_Header() {
   web.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate"); 
@@ -44,10 +44,10 @@ void server_main() {
     if (root) {
       root.rewindDirectory();
       SendHTML_Header();
-      webpage += F("<table align='center'>");
-      webpage += F("<tr><th>Name/Type</th><th style='width:20%'>Type File/Dir</th><th>File Size</th></tr>");
+      //webpage += F("<table align='center'>");
+      //webpage += F("<tr><th>Name/Type</th><th style='width:20%'>Type File/Dir</th><th>File Size</th></tr>");
       //printDirectory("/",0);
-      webpage += F("</table>");
+      //webpage += F("</table>");
       SendHTML_Content();
       root.close();
     }
@@ -60,10 +60,18 @@ void server_main() {
     SendHTML_Stop();   //Stop is needed because no content length was sent
 }
 
-void File_Upload() {
+void lsmusic() {
   
 }
 
-void handleFileUpload() {
+void player() {
+
+}
+
+void lamps() {
   
+}
+
+void netupload() {
+
 }

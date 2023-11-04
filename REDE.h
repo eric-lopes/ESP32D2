@@ -1,20 +1,22 @@
+#include "ABAJUR.h"
+
 String redes[10];           //Armazena SSIDs e Senhas das redes (Até o máximo de 5 redes e senhas)
 int numrede=0;
+
 //Lê o arquivo com as redes
-int netread(fs::FS &fs){
-  int a=0;
+void netread(fs::FS &fs){
   File file = fs.open("/wifi.net");
-  if(!file){return 0;} //Retorna 0 se não houver o arquivo
+  if(!file){return;} //Retorna 0 se não houver o arquivo
   while(file.available()){
-    redes[a] = file.readStringUntil('\n'); 
-    a++;
+    redes[numrede] = file.readStringUntil('\n'); 
+    numrede++;
   }
   file.close();
-  return a; //Retorna o número de strings lidas (deve ser par)
 }
 
 //Faz a conexão com a internet ou cria um Access Point
 void netstart() {
+  WiFi.disconnect();
   int stat=0, net=0;
   WiFi.mode(WIFI_AP_STA);
   //Se existir redes cadastradas, scaneia e tenta conectar
@@ -39,19 +41,19 @@ void netstart() {
     char senha[aux];
     redes[net+1].toCharArray(senha,aux);
     WiFi.begin(rede, senha);
-    delay(5000);
+    delay(3000);
     unsigned long milistart=millis(), miliend=millis();
     while (WiFi.status() != WL_CONNECTED) {
       delay(1000);
       miliend=millis();
-      if(WiFi.status()==6 || miliend-milistart>=30000) {
+      if(WiFi.status()==6 || miliend-milistart>=27000) {
         break;
       }
     }
     for(int i=0;i<3;i++) {
-      digitalWrite(27,HIGH);
+      lamp(3);
       delay(100);
-      digitalWrite(27,LOW);
+      lamp(0);
       delay(100);
     }
   }  
@@ -61,9 +63,9 @@ void netstart() {
   IPAddress NMask(255, 255, 255, 0);
   WiFi.softAPConfig(Ip, Ip, NMask);
   for(int i=0;i<3;i++) {
-    digitalWrite(27,HIGH);
+    lamp(3);
     delay(100);
-    digitalWrite(27,LOW);
+    lamp(0);
     delay(100);
   }
 }

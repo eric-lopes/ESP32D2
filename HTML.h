@@ -1,7 +1,12 @@
+#include <DHT.h>
+
 String webpage = ""; //String to save the html code
+bool sdstat=false;
+int volume=15;
+
+DHT dht(33, DHT11);
 
 void append_page_header() {
-
   webpage  = F("<!DOCTYPE html>");
   webpage += F("<html>");  
   webpage += F("<head>");
@@ -9,7 +14,7 @@ void append_page_header() {
   webpage += F("<meta name='viewport' content='user-scalable=yes,initial-scale=1.0,width=device-width'>    ");
   webpage += F("<title>ESP32-D2</title>");
   webpage += F("<style>");
-  webpage += F("body{max-width:66%;margin:0 auto;font-family:arial;font-size:100%;}  ");
+  webpage += F("body{max-width:80%;margin:0 auto;font-family:arial;font-size:100%;}  ");
   webpage += F("ul{list-style-type:none;padding:0;border-radius:0em;overflow:hidden;background-color:#00008b;font-size:1em;}  ");
   webpage += F("li{float:left;border-radius:0em;border-right:0em solid #bbb;}");  
   webpage += F("li a{color:white; display: block;border-radius:0.375em;padding:0.44em 0.44em;text-decoration:none;font-size:100%}  ");
@@ -33,12 +38,24 @@ void append_page_header() {
   char ipString[16];
   WiFi.localIP().toString().toCharArray(ipString, 16);
   webpage += "<h2 style='text-align: center;'>Endereço IP: " + String(ipString) + "</h2>";
-  webpage += F("<h2> Umidade: 123 %<br>Temperatura: 123ºC <br>Sensação Térmica: 123ºC</h2>");
+
+  float umi = dht.readHumidity();
+  String umid;
+  umid.concat(umi);
+  float temp = dht.readTemperature();
+  String tempt;
+  tempt.concat(temp);
+  float sens = dht.computeHeatIndex(temp, umi, false);
+  String senst;
+  senst.concat(sens);
+  webpage += "<h2> Umidade: " + umid +"% &emsp; Temperatura: " + tempt +"ºC &emsp; Sensação Térmica: " + senst + "ºC</h2>";
   webpage += F("<hr>");
   webpage += F("<ul>");  
-  webpage += F("<li><a href='/'>Músicas</a></li>");
-  webpage += F("<li><a href='/upload'>Abajur</a></li>   ");
-  webpage += F("<li><a href='/upload'>Redes</a></li>");   
+  if(sdstat==true) {
+    webpage += F("<li><a href='/music'>Músicas</a></li>");
+  }
+  webpage += F("<li><a href='/lamp'>Abajur</a></li>   ");
+  webpage += F("<li><a href='/net'>Redes</a></li>");   
   webpage += F("</ul>");
   }
 //Saves repeating many lines of code for HTML page footers

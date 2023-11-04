@@ -11,9 +11,11 @@ BCLK = 26
 LRC = 25
 DIN = 22
 
-KY037 AO = 33
 KY037 D0 = 32
+DHT11 = 33
 */
+
+
 
 //Funções Transitórias
 void cria(fs::FS &fs, const char * path){
