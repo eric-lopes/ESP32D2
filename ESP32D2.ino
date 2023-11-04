@@ -14,20 +14,17 @@ TaskHandle_t server;
 
 //SETUP
 void setup() {
-  delay(500);
+  delay(1000);
   pinMode(R,OUTPUT);
   pinMode(G,OUTPUT);
   pinMode(B,OUTPUT);
-  delay(500);
   lamp(0);
-  delay(500);
+  delay(1000);
   Serial.begin(115200);
-  delay(500);
+  delay(1000);
   audio.setPinout(26,25,22);
-  delay(500);
-  //audio.forceMono(true);
   dht.begin();
-  delay(500);
+  delay(1000);
   if(SD.begin()){
     for(int i=0;i<3;i++) {
       lamp(2);
@@ -69,7 +66,7 @@ void servercode( void * pvParameters ) {
   for(int j=0;j<numpasta;j++) {
     Serial.println(pasta[j]);
   }
-  musicaread(SD,0);
+  musicaread(SD,6);
   Serial.println("PLAYLIST");
   for(int l=0;l<nummusica;l++) {
     Serial.println(musica[l]);
@@ -77,8 +74,8 @@ void servercode( void * pvParameters ) {
   audio_eof_mp3("Playlist");
   while(true) {
     web.handleClient();
-    lamp(8);
-    delay(200);
+    //lamp(8);
+    delay(300);
   }
 }
 
