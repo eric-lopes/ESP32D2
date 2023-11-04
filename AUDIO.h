@@ -2,7 +2,7 @@
 
 String pasta[20];          //Armazena o caminho de cada pasta de música
 int numpasta=0;             //Armazena o Número de Pastas com Música
-String musica[50];         //Armazena uma lista embaralhada de músicas de uma pasta
+String musica[30];         //Armazena uma lista embaralhada de músicas de uma pasta
 int nummusica=0;            //Armazena o número de músicas em uma pasta
 
 Audio audio;
@@ -27,13 +27,11 @@ void musicaread(fs::FS &fs,int p){
   nummusica=0;
   File root = fs.open(pasta[p]);
   File file = root.openNextFile();
-  Serial.println("LEITURA DAS MUSICAS");
   while(file){
     if(!file.isDirectory()){
       musica[nummusica]=pasta[p];
       musica[nummusica].concat("/");
       musica[nummusica].concat(file.name());
-      Serial.println(musica[nummusica]);
       nummusica++;
     }
     file = root.openNextFile();
@@ -48,25 +46,19 @@ void musicaread(fs::FS &fs,int p){
 }
 
 void audio_eof_mp3(const char *info){
-    static int i=0;
-    if(i==nummusica) {
-      Serial.println(i);
-      audio.stopSong();
-      i=0;
-      Serial.println(i);
-    }
-    if(i<nummusica) {
-      Serial.println("Ínicio Player");
-      int aux=0;
-      aux=musica[i].length()+1;
-      char music[aux];
-      musica[i].toCharArray(music,aux);
-      Serial.println(music);
-      Serial.print("Música: ");
-      Serial.println(i);
-      audio.connecttoSD(music);
-      i++;
-      
-    }
-
+  static int i=0;
+  if(i<nummusica) {
+    int aux=0;
+    aux=musica[i].length()+1;
+    char music[aux];
+    musica[i].toCharArray(music,aux);
+    audio.connecttoSD(music);
+    i++;
+    return;
+  }
+  if(i==nummusica) {
+    audio.stopSong();
+    i=0;
+    return;
+  }
 }

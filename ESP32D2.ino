@@ -65,6 +65,7 @@ void servercode( void * pvParameters ) {
   Serial.println(xPortGetCoreID());
   delay(5000);
   pastaread(SD);
+  Serial.println("PASTAS");
   for(int j=0;j<numpasta;j++) {
     Serial.println(pasta[j]);
   }
