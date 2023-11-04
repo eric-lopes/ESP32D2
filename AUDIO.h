@@ -14,8 +14,7 @@ void pastaread(fs::FS &fs){
   File file = music.openNextFile();
   while(file){
     if(file.isDirectory()){
-      pasta[numpasta]= "/Music/"; 
-      pasta[numpasta].concat(file.name());
+      pasta[numpasta]=file.name();
       numpasta++;
     }  
     file = music.openNextFile();
@@ -25,11 +24,13 @@ void pastaread(fs::FS &fs){
 //Lê as músicas dentro de uma pasta e gera uma lista embaralhada
 void musicaread(fs::FS &fs,int p){
   nummusica=0;
-  File root = fs.open(pasta[p]);
+  String path="/Music/";
+  path.concat(pasta[p]);
+  File root = fs.open(path);
   File file = root.openNextFile();
   while(file){
     if(!file.isDirectory()){
-      musica[nummusica]=pasta[p];
+      musica[nummusica]=path;
       musica[nummusica].concat("/");
       musica[nummusica].concat(file.name());
       nummusica++;

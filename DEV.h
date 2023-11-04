@@ -15,7 +15,28 @@ KY037 D0 = 32
 DHT11 = 33
 */
 
+//#include <FS.h>
 
+void htmlteste(){
+    File root = SD.open("/");
+    if (root) {
+      root.rewindDirectory();
+      SendHTML_Header();
+      //webpage += F("<table align='center'>");
+      //webpage += F("<tr><th>Name/Type</th><th style='width:20%'>Type File/Dir</th><th>File Size</th></tr>");
+      //printDirectory("/",0);
+      //webpage += F("</table>");
+      SendHTML_Content();
+      root.close();
+    }
+    else {
+      SendHTML_Header();
+      webpage += F("<h3>No Files Found</h3>");
+    }
+    append_page_footer();
+    SendHTML_Content();
+    SendHTML_Stop();   //Stop is needed because no content length was sent
+}
 
 //Funções Transitórias
 void cria(fs::FS &fs, const char * path){

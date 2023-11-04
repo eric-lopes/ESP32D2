@@ -1,13 +1,12 @@
 //Bibliotecas Utilizadas
 #include <WiFi.h>
-#include <FS.h>
 #include <SD.h>
 #include <SPI.h>
 #include <ESP32WebServer.h>
 #include "AUDIO.h"
 #include "REDE.h"
 #include "SERVER.h"
-#include "DEV.h"
+//#include "DEV.h"
 
 //Cria as Tasks para usar o dual core
 TaskHandle_t server;
@@ -52,7 +51,8 @@ void setup() {
   web.on("/", server_main);
   web.on("/music", lsmusic);
   web.on("/lamp",  lamps);
-  web.on("/net",  HTTP_POST,[](){ web.send(200);}, netupload);
+  web.on("/net",  netupload);
+  //web.on("/net",  HTTP_POST,[](){ web.send(200);}, netupload);
   web.begin();
 }
 
@@ -66,7 +66,7 @@ void servercode( void * pvParameters ) {
   for(int j=0;j<numpasta;j++) {
     Serial.println(pasta[j]);
   }
-  musicaread(SD,6);
+  musicaread(SD,4);
   Serial.println("PLAYLIST");
   for(int l=0;l<nummusica;l++) {
     Serial.println(musica[l]);
@@ -75,7 +75,7 @@ void servercode( void * pvParameters ) {
   while(true) {
     web.handleClient();
     //lamp(8);
-    delay(300);
+    delay(250);
   }
 }
 
