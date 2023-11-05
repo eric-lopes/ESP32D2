@@ -49,7 +49,6 @@ void setup() {
   xTaskCreatePinnedToCore(servercode, "Server", 10000, NULL, 1, &server, 0);
   //Funções do Servidor
   web.on("/", server_main);
-  web.on("/music", lsmusic);
   web.on("/lamp",  lamps);
   web.on("/net",  netupload);
   //web.on("/net",  HTTP_POST,[](){ web.send(200);}, netupload);
@@ -58,23 +57,8 @@ void setup() {
 
 //Código para ser usado no Task Player
 void servercode( void * pvParameters ) {
-  Serial.print("Server no core: ");
-  Serial.println(xPortGetCoreID());
-  delay(5000);
-  pastaread(SD);
-  Serial.println("PASTAS");
-  for(int j=0;j<numpasta;j++) {
-    Serial.println(pasta[j]);
-  }
-  musicaread(SD,4);
-  Serial.println("PLAYLIST");
-  for(int l=0;l<nummusica;l++) {
-    Serial.println(musica[l]);
-  }
-  audio_eof_mp3("Playlist");
   while(true) {
     web.handleClient();
-    //lamp(8);
     delay(250);
   }
 }

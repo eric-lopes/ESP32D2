@@ -19,6 +19,7 @@ void netstart() {
   WiFi.disconnect();
   int stat=0, net=0;
   WiFi.mode(WIFI_AP_STA);
+  WiFi.setHostname("ESP32D2");
   //Se existir redes cadastradas, scaneia e tenta conectar
   if(numrede!=0) {
     int n = WiFi.scanNetworks(); 

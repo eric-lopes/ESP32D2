@@ -1,11 +1,13 @@
 #include "Audio.h"
 
-String pasta[20];          //Armazena o caminho de cada pasta de música
+String pasta[20];           //Armazena o caminho de cada pasta de música
 int numpasta=0;             //Armazena o Número de Pastas com Música
-String musica[30];         //Armazena uma lista embaralhada de músicas de uma pasta
+String musica[30];          //Armazena uma lista embaralhada de músicas de uma pasta
+String playlist[30];
 int nummusica=0;            //Armazena o número de músicas em uma pasta
 
 Audio audio;
+int play=0;
 
 //Lê as pastas na pasta Music
 void pastaread(fs::FS &fs){
@@ -23,6 +25,7 @@ void pastaread(fs::FS &fs){
 
 //Lê as músicas dentro de uma pasta e gera uma lista embaralhada
 void musicaread(fs::FS &fs,int p){
+  play=0;
   nummusica=0;
   String path="/Music/";
   path.concat(pasta[p]);
@@ -33,6 +36,7 @@ void musicaread(fs::FS &fs,int p){
       musica[nummusica]=path;
       musica[nummusica].concat("/");
       musica[nummusica].concat(file.name());
+      playlist[nummusica]=file.name();
       nummusica++;
     }
     file = root.openNextFile();
@@ -40,26 +44,29 @@ void musicaread(fs::FS &fs,int p){
   for(int b=0;b<nummusica;b++) {
     int r=random(b,nummusica);
     String music;
+    String playlst;
     music=musica[b];
+    playlst=playlist[b];
     musica[b]=musica[r];
+    playlist[b]=playlist[r];
     musica[r]=music;
+    playlist[r]=playlst;
   }
 }
 
 void audio_eof_mp3(const char *info){
-  static int i=0;
-  if(i<nummusica) {
+  if(play<nummusica) {
     int aux=0;
-    aux=musica[i].length()+1;
+    aux=musica[play].length()+1;
     char music[aux];
-    musica[i].toCharArray(music,aux);
+    musica[play].toCharArray(music,aux);
     audio.connecttoSD(music);
-    i++;
+    play++;
     return;
   }
-  if(i==nummusica) {
+  if(play==nummusica) {
     audio.stopSong();
-    i=0;
+    play=0;
     return;
   }
 }

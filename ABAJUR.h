@@ -46,14 +46,5 @@ void lamp(int lampstat) {
     digitalWrite(G,HIGH);
     digitalWrite(B,HIGH);
     break;
-  case 8:
-    static int k=1; 
-    lamp(k);
-    delay(200); // alterar para 400 ou 500
-    k++;
-    if(k==8) {
-      k=1; 
-    }
-    break;
   }
 }
