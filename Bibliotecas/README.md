@@ -8,3 +8,4 @@
 ### Créditos: 
 ### Esp32-audioI2S https://github.com/schreibfaul1/ESP32-audioI2S
 ### Esp32WebServer https://github.com/Pedroalbuquerque/ESP32WebServer
+### Esp32-A2DP     https://github.com/pschatzmann/ESP32-A2DP
