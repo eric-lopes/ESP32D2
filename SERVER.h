@@ -3,8 +3,7 @@
 ESP32WebServer web(80);
 DHT dht(33, DHT11);
 
-String webpage = ""; //String to save the html code
-bool sdstat=false;
+String webpage = "";
 int volume=10;
 
 void append_page_header() {
@@ -80,37 +79,13 @@ void SendHTML_Content(){
 
 void SendHTML_Stop(){
   web.sendContent("");
-  web.client().stop(); //Stop is needed because no content length was sent
+  web.client().stop();
 }
 
 void server_main(){
   pastaread(SD);
   if(web.args()>0) { 
     String cmd = web.arg(0);
-    if(cmd=="bco") {
-      lamp(7);
-    }
-    if(cmd=="vrm") {
-      lamp(1);
-    }
-    if(cmd=="vrd") {
-      lamp(2);
-    }
-    if(cmd=="azl") {
-      lamp(3);
-    }
-    if(cmd=="ama") {
-      lamp(4);
-     }
-    if(cmd=="rxo") {
-      lamp(5);
-    }
-    if(cmd=="cia") {
-      lamp(6);
-    }
-    if(cmd=="off") {
-      lamp(0);
-    }
     for(int a=1;a<=numpasta;a++) {
       if(a==cmd.toInt()) {
         audio.stopSong();
@@ -137,72 +112,78 @@ void server_main(){
       audio_eof_mp3("Playlist");
     }
     if(cmd=="vol+") {
-      volume++;
-      if(volume>21) {
-        volume=21;
+      if(volume<21) {
+        volume++;
       }
     }
     if(cmd=="vol-") {
-      volume--;
-      if(volume<0) {
-        volume=0;
+      if(volume>0) {
+        volume--;
       }
     }
-  }
-  SendHTML_Header(); 
-  webpage += F("<table align='center'>");
-  webpage += F("<tr><th style='font-size:1.25em; width:66%; text-align: center;'>Músicas</th>");
-  webpage += "<th style='font-size:1.25em; text-align: center;'>Volume: " + String(volume) + "</th></tr>";
-  for(int i=0;i<numpasta;i++) {
-    if (webpage.length() > 1000) {
-      SendHTML_Content();
+    if(cmd=="bco") {
+      lamp(7);
     }
-    webpage += "<tr><td>"+pasta[i]+"</td>";
-    webpage += "<td>";
-    webpage += F("<FORM action='/' method='post'>"); 
-    webpage += F("<button style='float:right; color:#FEE4AF; width:70%; background-color: #011B50;' type='submit' name='play'"); 
-    webpage += F("' value='"); webpage +=String(i+1); webpage +=F("'>Tocar &#9658;</button>");
-    webpage += "</td>";
-    webpage += "</tr>";
+    if(cmd=="vrm") {
+      lamp(1);
+    }
+    if(cmd=="vrd") {
+      lamp(2);
+    }
+    if(cmd=="azl") {
+      lamp(3);
+    }
+    if(cmd=="ama") {
+      lamp(4);
+     }
+    if(cmd=="rxo") {
+      lamp(5);
+    }
+    if(cmd=="cia") {
+      lamp(6);
+    }
+    if(cmd=="off") {
+      lamp(0);
+    }
   }
-  webpage += F("</table>");
-  webpage += F("<hr style='width:94%'>");
+  SendHTML_Header();
+  if(numpasta>0) { 
+    webpage += F("<table align='center'>");
+    webpage += F("<tr><th style='font-size:1.25em; width:66%; text-align: center;'>Músicas</th>");
+    webpage += "<th style='font-size:1.25em; text-align: center;'>Volume: " + String(volume) + "</th></tr>";
+    for(int i=0;i<numpasta;i++) {
+      if (webpage.length() > 1000) {
+        SendHTML_Content();
+      }
+      webpage += "<tr><td>"+pasta[i]+"</td><td>";
+      webpage += F("<FORM action='/' method='post'>"); 
+      webpage += F("<button style='float:right; color:#FEE4AF; width:70%; background-color: #011B50;' type='submit' name='play'"); 
+      webpage += F("' value='"); webpage +=String(i+1); webpage +=F("'>Tocar &#9658;</button></td></tr>");
+    }
+    webpage += F("</table>");
+    webpage += F("<hr style='width:94%'>");
+  }
   SendHTML_Content();
   if(nummusica>0) {
-    webpage += F("<table align='center'>");
-    webpage += "<tr>";
-    webpage += "<td>";
+    webpage += F("<table align='center'><tr><td>");
     webpage += F("<FORM action='/' method='post'>"); 
     webpage += F("<button type='submit' style='width:100%; height:50px; background-color: #37B1E7;' name='Previous'"); 
-    webpage += F("' value='"); webpage +="prev"; webpage +=F("'>&#9668;&#9668;</button>");
-    webpage += "</td>";
-    webpage += "<td>";
+    webpage += F("' value='"); webpage +="prev"; webpage +=F("'>&#9668;&#9668;</button></td><td>");
     webpage += F("<FORM action='/' method='post'>"); 
     webpage += F("<button type='submit' style='width:100%; height:50px; background-color: #37B1E7;' name='Pause'"); 
-    webpage += F("' value='"); webpage +="pause"; webpage +=F("'>&#9658;/&#10074;&#10074;</button>");
-    webpage += "</td>";
-    webpage += "<td>";
+    webpage += F("' value='"); webpage +="pause"; webpage +=F("'>&#9658;/&#10074;&#10074;</button></td><td>");
     webpage += F("<FORM action='/' method='post'>"); 
     webpage += F("<button type='submit' style='width:100%; height:50px; background-color: #37B1E7;' name='Next'"); 
-    webpage += F("' value='"); webpage +="next"; webpage +=F("'>&#9658;&#9658;</button>");
-    webpage += "</td>";
-    webpage += "<td>";
+    webpage += F("' value='"); webpage +="next"; webpage +=F("'>&#9658;&#9658;</button></td><td>");
     webpage += F("<FORM action='/' method='post'>"); 
     webpage += F("<button type='submit' style='width:100%; height:50px; background-color: #37B1E7;' name='Stop'"); 
-    webpage += F("' value='"); webpage +="stop"; webpage +=F("'>&#9724;</button>");
-    webpage += "</td>";
-    webpage += "<td>";
+    webpage += F("' value='"); webpage +="stop"; webpage +=F("'>&#9724;</button></td><td>");
     webpage += F("<FORM action='/' method='post'>"); 
     webpage += F("<button type='submit' style='width:100%; height:50px; background-color: #37B1E7;' name='Voldown'"); 
-    webpage += F("' value='"); webpage +="vol-"; webpage +=F("'> - </button>");
-    webpage += "</td>";
-    webpage += "<td>";
+    webpage += F("' value='"); webpage +="vol-"; webpage +=F("'> - </button></td><td>");
     webpage += F("<FORM action='/' method='post'>"); 
     webpage += F("<button type='submit' style='width:100%; height:50px; background-color: #37B1E7;' name='Volup'"); 
-    webpage += F("' value='"); webpage +="vol+"; webpage +=F("'> + </button>");
-    webpage += "</td>";
-    webpage += "</tr>";
-    webpage += F("</table>");
+    webpage += F("' value='"); webpage +="vol+"; webpage +=F("'> + </button></td></table>");
     webpage += F("<hr style='width:92%'>");
     webpage += F("<table style='width:90%;' align='center'>");
     webpage += F("<tr><th style='font-size:1.25em; text-align: center;'> </th>");
@@ -217,8 +198,7 @@ void server_main(){
       else {
         webpage += "<tr><td> </td>";
       }
-      webpage += "<td>"+playlist[i]+"</td>";
-      webpage += "</tr>";
+      webpage += "<td>"+playlist[i]+"</td></tr>";
     }
     webpage += F("</table>");
     webpage += F("<hr style='width:90%'>");
@@ -231,62 +211,44 @@ void server_main(){
 
 void lamps() {
   SendHTML_Header();
-  webpage += "<tr>";
-  webpage += "<td>";
+  webpage += "<tr><td>";
   webpage += F("<FORM action='/' method='post'>"); 
   webpage += F("<button type='submit' style='color:#000000; width:25%; height:75px; background-color: #FFFFFF;' name='Branco'"); 
-  webpage += F("' value='"); webpage +="bco"; webpage +=F("'>Branco</button>");
-  webpage += "</td>";
-  webpage += "<td>";
+  webpage += F("' value='"); webpage +="bco"; webpage +=F("'>Branco</button></td><td>");
   webpage += F("<FORM action='/' method='post'>"); 
   webpage += F("<button type='submit' style='color:#00FFFF; width:25%; height:75px; background-color: #FF0000;' name='Vermelho'"); 
-  webpage += F("' value='"); webpage +="vrm"; webpage +=F("'>Vermelho</button>");
-  webpage += "</td>";
-  webpage += "<td>";
+  webpage += F("' value='"); webpage +="vrm"; webpage +=F("'>Vermelho</button></td><td>");
   webpage += F("<FORM action='/' method='post'>"); 
   webpage += F("<button type='submit' style='color:#FF00FF; width:25%; height:75px; background-color: #00FF00;' name='Verde'"); 
-  webpage += F("' value='"); webpage +="vrd"; webpage +=F("'>Verde</button>");
-  webpage += "</td>";
-  webpage += "<td>";
+  webpage += F("' value='"); webpage +="vrd"; webpage +=F("'>Verde</button></td><td>");
   webpage += F("<FORM action='/' method='post'>"); 
   webpage += F("<button type='submit' style='color:#FFFF00; width:25%; height:75px; background-color: #0000FF;' name='Azul'"); 
-  webpage += F("' value='"); webpage +="azl"; webpage +=F("'>Azul</button>");
-  webpage += "</td>";
-  webpage += "<td>";
+  webpage += F("' value='"); webpage +="azl"; webpage +=F("'>Azul</button></td><td>");
   webpage += F("<FORM action='/' method='post'>"); 
   webpage += F("<button type='submit' style='color:#0000FF; width:25%; height:75px; background-color: #FFFF00;' name='Amarelo'"); 
-  webpage += F("' value='"); webpage +="ama"; webpage +=F("'>Amarelo</button>");
-  webpage += "</td>";
-  webpage += "<td>";
+  webpage += F("' value='"); webpage +="ama"; webpage +=F("'>Amarelo</button></td><td>");
   webpage += F("<FORM action='/' method='post'>"); 
   webpage += F("<button type='submit' style='color:#00FF00; width:25%; height:75px; background-color: #FF00FF;' name='Roxo'"); 
-  webpage += F("' value='"); webpage +="rxo"; webpage +=F("'>Roxo</button>");
-  webpage += "</td>";
-  webpage += "<td>";
+  webpage += F("' value='"); webpage +="rxo"; webpage +=F("'>Roxo</button></td><td>");
   webpage += F("<FORM action='/' method='post'>"); 
   webpage += F("<button type='submit' style='color:#FF0000; width:25%; height:75px; background-color: #00FFFF;' name='Ciano'"); 
-  webpage += F("' value='"); webpage +="cia"; webpage +=F("'>Ciano</button>");
-  webpage += "</td>";
-  webpage += "<td>";
+  webpage += F("' value='"); webpage +="cia"; webpage +=F("'>Ciano</button></td><td>");
   webpage += F("<FORM action='/' method='post'>"); 
   webpage += F("<button type='submit' style='color: #FFFFFF; width:25%; height:75px; background-color: #000000;' name='Off'"); 
-  webpage += F("' value='"); webpage +="off"; webpage +=F("'>Desliga</button>");
-  webpage += "</td>";
-  webpage += "</tr>";
-  webpage += F("<hr>");
+  webpage += F("' value='"); webpage +="off"; webpage +=F("'>Desliga</button></td></tr><hr>");
   SendHTML_Content();
   append_page_footer();
   SendHTML_Content();
   SendHTML_Stop();   
 }
 
-void netupload() {
+void newnet() {
   SendHTML_Header();
 
-  webpage += F("<h1>ADICIONAR REDE</h1>");//Gerar a lista de músicas
+  webpage += F("<h1>ADICIONAR REDE</h1>");
   SendHTML_Content();
   
   append_page_footer();
   SendHTML_Content();
-  SendHTML_Stop();   //Stop is needed because no content length was sent
+  SendHTML_Stop();
 }

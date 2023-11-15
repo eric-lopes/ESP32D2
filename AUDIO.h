@@ -2,8 +2,8 @@
 
 String pasta[20];           //Armazena o caminho de cada pasta de música
 int numpasta=0;             //Armazena o Número de Pastas com Música
-String musica[30];          //Armazena uma lista embaralhada de músicas de uma pasta
-String playlist[30];
+String musica[50];          //Armazena uma lista embaralhada de músicas de uma pasta
+String playlist[50];
 int nummusica=0;            //Armazena o número de músicas em uma pasta
 
 Audio audio;
@@ -52,6 +52,21 @@ void musicaread(fs::FS &fs,int p){
     musica[r]=music;
     playlist[r]=playlst;
   }
+}
+
+void artoo(fs::FS &fs) {
+  File root = fs.open("/R2D2");
+  File file = root.openNextFile();
+  int count=0;
+  while(file){
+    if(!file.isDirectory()){
+      musica[count]="/R2D2/";
+      musica[count].concat(file.name());
+      count++;
+    }
+    file = root.openNextFile();
+  }
+  
 }
 
 void audio_eof_mp3(const char *info){
