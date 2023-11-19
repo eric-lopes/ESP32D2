@@ -4,12 +4,18 @@
 #include <SPI.h>
 #include <ESP32WebServer.h>
 #include "AUDIO.h"
-#include "REDE.h"
 #include "SERVER.h"
 //#include "DEV.h"
 
 //Cria as Tasks para usar o dual core
 TaskHandle_t server;
+
+void allof() {
+  nummusica=0;
+  audio.stopSong();
+  pisc=false;
+  lamp(0);
+}
 
 //SETUP
 void setup() {
@@ -21,6 +27,7 @@ void setup() {
   audio.setPinout(26,25,22);
   dht.begin();
   delay(1250);
+  Serial.begin(115200);
   if(SD.begin()){
     for(int i=0;i<3;i++) {
       lamp(2);
@@ -51,15 +58,44 @@ void setup() {
   //Funções do Servidor
   web.on("/", server_main);
   web.on("/lamp", lamps);
+  web.on("/timer",timeroff);
+  web.on("/timeron", HTTP_POST, [](){  
+    String argtempo = web.arg("tempo");
+    int tempo = argtempo.toInt();
+    timer.stop(timerid);
+    timerid = timer.after(tempo*1000*60, allof);
+    SendHTML_Header();
+    webpage += "<h3>Abajur e Música desligarão em " + argtempo +" minuto(s). </h3>";
+    SendHTML_Content();
+    append_page_footer();
+    SendHTML_Content();
+    SendHTML_Stop();
+  });
   web.on("/net",  newnet);
+  web.on("/netnew", HTTP_POST, [](){  
+    String ssid = web.arg("ssid");
+    String passwd = web.arg("pass");
+    SendHTML_Header();
+    webpage += "<h3>Você cadastrou a rede: " + ssid + ". </h3>"; 
+    webpage += "<h3>Com a senha: " + passwd + ".  </h3>"; 
+    SendHTML_Content();
+    netwrite(SD,ssid,passwd);
+    netread(SD);
+    netstart();
+    append_page_footer();
+    SendHTML_Content();
+    SendHTML_Stop();
+  });
   web.begin();
-
 }
 
 //Código para ser usado no Task Player
 void servercode( void * pvParameters ) {
   while(true) {
     web.handleClient();
+    timer.update();
+    pisca(pisc);
+    endpsc=millis();
     delay(100);
   }
 }

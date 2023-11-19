@@ -1,13 +1,13 @@
-#include "Audio.h"
+#include "Audio.h"        //Biblioteca que toca áudio no protocolo I2S
 
-String pasta[20];           //Armazena o caminho de cada pasta de música
-int numpasta=0;             //Armazena o Número de Pastas com Música
-String musica[50];          //Armazena uma lista embaralhada de músicas de uma pasta
-String playlist[50];
-int nummusica=0;            //Armazena o número de músicas em uma pasta
+String pasta[50];           //Armazena o caminho de cada pasta de música
+int numpasta=0;           //Armazena o Número de Pastas de Música
+String musica[99];          //Armazena a lista embaralhada dos caminhos das músicas
+String playlist[99];        //Armazena a lista embaralhada dos nomes das músicas
+int nummusica=0;          //Armazena o número de músicas em uma pasta
+int play=0;               //Armazena qual música está sendo tocada no momento
 
 Audio audio;
-int play=0;
 
 //Lê as pastas na pasta Music
 void pastaread(fs::FS &fs){
@@ -25,8 +25,7 @@ void pastaread(fs::FS &fs){
 
 //Lê as músicas dentro de uma pasta e gera uma lista embaralhada
 void musicaread(fs::FS &fs,int p){
-  play=0;
-  nummusica=0;
+  play=0, nummusica=0;
   String path="/Music/";
   path.concat(pasta[p]);
   File root = fs.open(path);
@@ -54,6 +53,7 @@ void musicaread(fs::FS &fs,int p){
   }
 }
 
+//Toca um som aleatório do R2-D2 ao iniciar
 void artoo(fs::FS &fs) {
   File root = fs.open("/R2D2");
   File file = root.openNextFile();
@@ -66,9 +66,9 @@ void artoo(fs::FS &fs) {
     }
     file = root.openNextFile();
   }
-  
 }
 
+//Função que é executada ao final de cada mp3
 void audio_eof_mp3(const char *info){
   if(play<nummusica) {
     int aux=0;

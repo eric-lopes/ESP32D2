@@ -1,6 +1,6 @@
 #include "ABAJUR.h"
 
-String redes[10];           //Armazena SSIDs e Senhas das redes (Até o máximo de 5 redes e senhas)
+String redes[20];           //Armazena SSIDs e Senhas das redes (Até o máximo de 5 redes e senhas)
 int numrede=0;
 
 //Lê o arquivo com as redes
@@ -12,6 +12,33 @@ void netread(fs::FS &fs){
     numrede++;
   }
   file.close();
+}
+
+//Acrescenta nova rede e nova senha para o arquivo de redes
+void netwrite(fs::FS &fs, String ssid, String pass){
+  File file = fs.open("/wifi.net", FILE_APPEND);
+  file.print(ssid);
+  file.print("\n");
+  file.print(pass);
+  file.print("\n");
+  file.close();
+}
+
+//DELETAR
+void readFile(fs::FS &fs, const char * path){
+    Serial.printf("Reading file: %s\n", path);
+
+    File file = fs.open(path);
+    if(!file){
+        Serial.println("Failed to open file for reading");
+        return;
+    }
+
+    Serial.print("Read from file: ");
+    while(file.available()){
+        Serial.write(file.read());
+    }
+    file.close();
 }
 
 //Faz a conexão com a internet ou cria um Access Point

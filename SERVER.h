@@ -1,10 +1,15 @@
 #include <DHT.h>
 
+#include <Timer.h>
+#include "REDE.h"
+
 ESP32WebServer web(80);
 DHT dht(33, DHT11);
+Timer timer;
 
 String webpage = "";
-int volume=10;
+int volume=11;
+int timerid=0;
 
 void append_page_header() {
   webpage  = F("<!DOCTYPE html>");
@@ -21,6 +26,7 @@ void append_page_header() {
   webpage += F("li a:hover{background-color:#1b71a8;border-radius:0em;font-size:100%}");  
   webpage += F("h1{color:white;text-align:center;border-radius:0em;font-size:1.5em;padding:0.2em 0.2em;background:#00008b;}  ");
   webpage += F("h2{color:white;border-radius:0em;font-size:1.0em;padding:0.2em 0.2em;background:#00008b;}");
+  webpage += F("h3{text-align:center;} ");
   webpage += F("table{font-family:arial,sans-serif;font-size:0.9em;border-collapse:collapse;width:94%;}");   
   webpage += F("th,td {border:0.06em solid #0552F7;text-align:left;padding:0.3em;border-bottom:0.06em solid 0552F7#;}   ");
   webpage += F("tr:nth-child(odd) {background-color:#4E84F7 ;}"); //3572F3
@@ -53,6 +59,7 @@ void append_page_header() {
   webpage += F("<ul>");
   webpage += F("<li><a href='/'>Início</a></li>   ");  
   webpage += F("<li><a href='/lamp'>Abajur</a></li>   ");
+  webpage += F("<li><a href='/timer'>Timer</a></li>   ");
   webpage += F("<li><a href='/net'>Redes</a></li>");   
   webpage += F("</ul>");
 }
@@ -121,28 +128,45 @@ void server_main(){
         volume--;
       }
     }
+    if(cmd=="reset") {
+      timer.stop(timerid);
+    }
     if(cmd=="bco") {
+      pisc=false;
       lamp(7);
     }
     if(cmd=="vrm") {
+      pisc=false;
       lamp(1);
     }
     if(cmd=="vrd") {
+      pisc=false;
       lamp(2);
     }
     if(cmd=="azl") {
+      pisc=false;
       lamp(3);
     }
     if(cmd=="ama") {
+      pisc=false;
       lamp(4);
      }
     if(cmd=="rxo") {
+      pisc=false;
       lamp(5);
     }
     if(cmd=="cia") {
+      pisc=false;
       lamp(6);
     }
+    if(cmd=="psc") {
+      lamp(0);
+      startpsc=millis();
+      endpsc=millis();
+      pisc=true;
+    }
     if(cmd=="off") {
+      pisc=false;
       lamp(0);
     }
   }
@@ -213,28 +237,31 @@ void lamps() {
   SendHTML_Header();
   webpage += "<tr><td>";
   webpage += F("<FORM action='/' method='post'>"); 
-  webpage += F("<button type='submit' style='color:#000000; width:25%; height:75px; background-color: #FFFFFF;' name='Branco'"); 
-  webpage += F("' value='"); webpage +="bco"; webpage +=F("'>Branco</button></td><td>");
-  webpage += F("<FORM action='/' method='post'>"); 
-  webpage += F("<button type='submit' style='color:#00FFFF; width:25%; height:75px; background-color: #FF0000;' name='Vermelho'"); 
+  webpage += F("<button type='submit' style='color:#00FFFF; width:33%; height:75px; background-color: #FF0000;' name='Vermelho'"); 
   webpage += F("' value='"); webpage +="vrm"; webpage +=F("'>Vermelho</button></td><td>");
   webpage += F("<FORM action='/' method='post'>"); 
-  webpage += F("<button type='submit' style='color:#FF00FF; width:25%; height:75px; background-color: #00FF00;' name='Verde'"); 
+  webpage += F("<button type='submit' style='color:#FF00FF; width:33%; height:75px; background-color: #00FF00;' name='Verde'"); 
   webpage += F("' value='"); webpage +="vrd"; webpage +=F("'>Verde</button></td><td>");
   webpage += F("<FORM action='/' method='post'>"); 
-  webpage += F("<button type='submit' style='color:#FFFF00; width:25%; height:75px; background-color: #0000FF;' name='Azul'"); 
+  webpage += F("<button type='submit' style='color:#FFFF00; width:33%; height:75px; background-color: #0000FF;' name='Azul'"); 
   webpage += F("' value='"); webpage +="azl"; webpage +=F("'>Azul</button></td><td>");
   webpage += F("<FORM action='/' method='post'>"); 
-  webpage += F("<button type='submit' style='color:#0000FF; width:25%; height:75px; background-color: #FFFF00;' name='Amarelo'"); 
+  webpage += F("<button type='submit' style='color:#0000FF; width:33%; height:75px; background-color: #FFFF00;' name='Amarelo'"); 
   webpage += F("' value='"); webpage +="ama"; webpage +=F("'>Amarelo</button></td><td>");
   webpage += F("<FORM action='/' method='post'>"); 
-  webpage += F("<button type='submit' style='color:#00FF00; width:25%; height:75px; background-color: #FF00FF;' name='Roxo'"); 
-  webpage += F("' value='"); webpage +="rxo"; webpage +=F("'>Roxo</button></td><td>");
-  webpage += F("<FORM action='/' method='post'>"); 
-  webpage += F("<button type='submit' style='color:#FF0000; width:25%; height:75px; background-color: #00FFFF;' name='Ciano'"); 
+  webpage += F("<button type='submit' style='color:#FF0000; width:33%; height:75px; background-color: #00FFFF;' name='Ciano'"); 
   webpage += F("' value='"); webpage +="cia"; webpage +=F("'>Ciano</button></td><td>");
   webpage += F("<FORM action='/' method='post'>"); 
-  webpage += F("<button type='submit' style='color: #FFFFFF; width:25%; height:75px; background-color: #000000;' name='Off'"); 
+  webpage += F("<button type='submit' style='color:#00FF00; width:33%; height:75px; background-color: #FF00FF;' name='Roxo'"); 
+  webpage += F("' value='"); webpage +="rxo"; webpage +=F("'>Roxo</button></td><td>");
+  webpage += F("<FORM action='/' method='post'>"); 
+  webpage += F("<button type='submit' style='color:#000000; width:33%; height:75px; background-color: #FFFFFF;' name='Branco'");
+  webpage += F("' value='"); webpage +="bco"; webpage +=F("'>Branco</button></td><td>");
+  webpage += F("<FORM action='/' method='post'>"); 
+  webpage += F("<button type='submit' style='color: #666666; width:33%; height:75px; background-color: #999999;' name='Pisca'"); 
+  webpage += F("' value='"); webpage +="psc"; webpage +=F("'>Piscar</button></td><td>");
+  webpage += F("<FORM action='/' method='post'>"); 
+  webpage += F("<button type='submit' style='color: #FFFFFF; width:33%; height:75px; background-color: #000000;' name='Off'"); 
   webpage += F("' value='"); webpage +="off"; webpage +=F("'>Desliga</button></td></tr><hr>");
   SendHTML_Content();
   append_page_footer();
@@ -242,12 +269,45 @@ void lamps() {
   SendHTML_Stop();   
 }
 
+void timeroff() {
+  SendHTML_Header();
+  webpage += F("<form align='center' width=250px action='/timeron' method='POST'>");
+  webpage += F("<label> Desligar após quantos minutos? </label>");
+  webpage += F("<input type='number' name='tempo'>");
+  webpage += F("<input type='submit' value='Enviar'>");
+  webpage += F("</form>");
+  webpage += F("<h3><FORM action='/' method='post'>"); 
+  webpage += F("<button style='height:30px; color:#222222; width:100px; background-color: #AAAAAA;' type='submit' name='reset'"); 
+  webpage += F("value='reset'>Parar o Timer</button></h3>");
+  SendHTML_Content();
+  append_page_footer();
+  SendHTML_Content();
+  SendHTML_Stop();
+}
+
 void newnet() {
   SendHTML_Header();
+  webpage += F("<table align='center'>");
+  webpage += F("<tr><th style='font-size:1.25em; width:50%; text-align: center;'>SSID</th></tr>");
+  int n = WiFi.scanNetworks(); 
+  for(int i=0;i<n;i++) {
+    if (webpage.length() > 1000) {
+      SendHTML_Content();
+    }
+    webpage += "<tr><td>"+WiFi.SSID(i)+"</td></tr>";
+  }
+  webpage += F("</table>");
+  webpage += F("<hr style='width:94%'>");
 
-  webpage += F("<h1>ADICIONAR REDE</h1>");
+  webpage += F("<form align='center'action='/netnew' method='POST'>");
+  webpage += F("<label for='ssid'> SSID: </label>");
+  webpage += F("<input type='text' id='ssid' name='ssid'><br>");
+  webpage += F("<label for='pass'>Senha: </label>");
+  webpage += F("<input type='text' id='pass' name='pass'><br><br>");
+  webpage += F("<input type='submit' value='Gravar'>");
+  webpage += F("</form>");
+   
   SendHTML_Content();
-  
   append_page_footer();
   SendHTML_Content();
   SendHTML_Stop();

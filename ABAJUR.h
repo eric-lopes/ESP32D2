@@ -3,6 +3,8 @@
 const int R=12;
 const int G=14;
 const int B=27;
+bool pisc=false;
+unsigned long startpsc=0,endpsc=0;
 
 void lamp(int lampstat) {
   switch(lampstat){
@@ -46,5 +48,16 @@ void lamp(int lampstat) {
     digitalWrite(G,HIGH);
     digitalWrite(B,HIGH);
     break;
+  }
+}
+
+void pisca (bool pisc) {
+  if(pisc==true) {
+    static int a=5;
+    lamp(a);
+    if(endpsc-startpsc>400){
+      startpsc=endpsc;
+      a=random(1,7);
+    }
   }
 }
