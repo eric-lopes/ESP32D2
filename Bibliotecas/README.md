@@ -4,3 +4,4 @@
 ### Esp32WebServer:     https://github.com/Pedroalbuquerque/ESP32WebServer
 ### Adafruit_Sensor:    https://github.com/adafruit/Adafruit_Sensor
 ### DHT-sensor-library: https://github.com/adafruit/DHT-sensor-library
+### Timer (versão 1.3): https://github.com/JChristensen/Timer/tree/v1.3
