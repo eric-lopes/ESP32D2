@@ -9,7 +9,7 @@
 | 4 | LED RGB |
 | 5 | Sensor DHT11 |
 
-### Versão 0.9 - Código ainda precisa de otimização e ser documentado. Preciso melhorar a função que adiciona redes ao arquivo wifi.net. Adicionar um som do R2-D2 quando o timer se esgotar. Fora isso, está perfeitamente funcional. 
+### Versão 0.9 - Código ainda precisa de otimização e ser documentado. Preciso melhorar a função que adiciona redes ao arquivo wifi.net. Fora isso, está perfeitamente funcional. 
 
 ### A raiz do cartão SD deve conter: Um arquivo wifi.net com rede e senha de cada rede WiFi a que quiser conectar (SSID numa linha, senha na outra e assim por diante); a pasta R2D2, com os sons do dróide para que toque quando necessário e uma pasta MUSIC onde devem ser coladas as pastas com músicas. Nada mais é necessário ao funcionamento. Aqui neste projeto trago os sons do R2-D2 e exemplos de música.
 
@@ -30,7 +30,7 @@ Are being used:
 | 4 | RGB LED |
 | 5 | DHT11 sensor |
 
-### Version 0.9 - Code still needs optimization and documentation. I need to improve the function that adds networks to the wifi.net file. Add a sound from R2-D2 when the timer runs out. Other than that, it's perfectly functional.
+### Version 0.9 - Code still needs optimization and documentation. I need to improve the function that adds networks to the wifi.net file. Other than that, it's perfectly functional.
 
 ### The root of the SD card must contain: A wifi.net file with the network and password for each WiFi network you want to connect to (SSID on one line, password on the other and so on); the R2D2 folder, with the droid's sounds so that it can play when necessary and a MUSIC folder where the folders with music should be pasted. Nothing else is necessary for operation. Here in this project I bring the sounds of R2-D2 and music examples.
 
