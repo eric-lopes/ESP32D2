@@ -1,4 +1,5 @@
-# São necessárias as seguintes bibliotecas: 
+# São necessárias as seguintes bibliotecas:
+# The following libraries are required:
 
 ### Esp32-audioI2S:     https://github.com/schreibfaul1/ESP32-audioI2S
 ### Esp32WebServer:     https://github.com/Pedroalbuquerque/ESP32WebServer
