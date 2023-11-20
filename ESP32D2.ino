@@ -6,16 +6,16 @@
 #include "AUDIO.h"
 #include "SERVER.h"
 
-//Cria as Tasks para usar o dual core
+//Cria a Task para usar o dual core
 TaskHandle_t server;
 
+//Função que desliga o som e o abajur
 void allof() {
-  play=0;
   nummusica=0;
   audio.stopSong();
   pisc=false;
   lamp(0);
-  delay(500);
+  delay(1000);
   int aux=0;
   int r=random(0,16);
   aux=R2D2[r].length()+1;
@@ -34,7 +34,6 @@ void setup() {
   audio.setPinout(26,25,22);
   dht.begin();
   delay(1250);
-  Serial.begin(115200);
   if(SD.begin()){
     for(int i=0;i<3;i++) {
       lamp(2);
@@ -85,9 +84,7 @@ void setup() {
     pagina_web += "<h3>Você cadastrou a rede: " + ssid + ". </h3>"; 
     pagina_web += "<h3>Com a senha: " + passwd + ".  </h3>"; 
     envia_html();
-    readwifi(SD);
     netwrite(SD,ssid,passwd);
-    readwifi(SD);
     netread(SD);
     netstart();
     envia_rodape();
@@ -95,7 +92,7 @@ void setup() {
   web.begin();
 }
 
-//Código para ser usado no Task Player
+//Código para ser usado no Task Server (Core 0)
 void servercode( void * pvParameters ) {
   while(true) {
     web.handleClient();
@@ -105,7 +102,7 @@ void servercode( void * pvParameters ) {
     delay(100);
   }
 }
-
+//LOOP (Core 1)
 void loop() {
   audio.loop();
   audio.setVolume(volume); 

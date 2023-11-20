@@ -75,6 +75,7 @@ void envia_html(){
 //Função para Enviar a Cabeça HTML para o Servidor
 void envia_cabeca() {
   web.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate"); 
+  web.sendHeader("Pragma", "no-cache"); 
   web.sendHeader("Expires", "-1"); 
   web.setContentLength(CONTENT_LENGTH_UNKNOWN); 
   web.send(200, "text/html", "");
@@ -85,6 +86,8 @@ void envia_cabeca() {
 //Adiciona o rodapé padrão à página HTML
 void envia_rodape() {
   web.sendContent("</body></html>");
+  web.sendContent("");
+  pagina_web="";
   web.client().stop();
 }
 
@@ -167,6 +170,7 @@ void index_html(){
     pagina_web += F("<table style='width:90%;' align='center'>");
     pagina_web += F("<tr><th style='font-size:1.25em; text-align: center;'> </th>");
     pagina_web += "<th style='font-size:1.25em; width:98%; text-align: center;'> Playlist</th></tr>";
+    envia_html();
     for(int i=0;i<nummusica;i++) {
       if (pagina_web.length() > 1000) {envia_html();}
       if (i==play-1) {pagina_web += "<tr><td style='text-align: right;'> &#8614; </td>";}

@@ -1,10 +1,10 @@
 //Define os GPIO Pins do LED
-const int R=12;
-const int G=14;
-const int B=27;
+const int R=12;  //Vermelho
+const int G=14;  //Verde
+const int B=27;  //Azul
 
 //Variáveis Globais
-bool pisc=false;					 //Define se irá ou não "piscar" o led
+bool pisc=false;					           //Define se irá ou não "piscar" o led
 unsigned long startpsc=0,endpsc=0;   //Millis para troca de cor ao "piscar"
 
 //Acende ou apaga o led com uma cor específica
@@ -37,7 +37,7 @@ void lamp(int lampstat) {
     break;
   case 5: //Ciano
     digitalWrite(R,LOW);
-    digitalWrite(G,HIGH)
+    digitalWrite(G,HIGH);
     digitalWrite(B,HIGH);
     break;
   case 6: //Roxo (Magenta)

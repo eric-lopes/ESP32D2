@@ -41,24 +41,10 @@ void netwrite(fs::FS &fs, String ssid, String pass){
   file.close();
 }
 
-//FUNÇÃO TESTE. DELETAR
+//Deleta o arquivo wifi.net
 void delwifi(fs::FS &fs){
     fs.remove("/wifi.net");       
 }
-
-void readwifi(fs::FS &fs){
-    File file = fs.open("/wifi.net");
-    if(!file){
-        Serial.println("Failed to open file for reading");
-        return;
-    }
-    Serial.print("Read from file: ");
-    while(file.available()){
-        Serial.write(file.read());
-    }
-    file.close();
-}
-//ATÉ AQUI
 
 //Faz a conexão com a internet ou cria um Access Point
 void netstart() {
