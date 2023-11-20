@@ -12,7 +12,6 @@ Audio audio;
 
 //Lê as pastas na pasta Music
 void pastaread(fs::FS &fs){
-  numpasta=0;
   File music = fs.open("/Music");
   File file = music.openNextFile();
   while(file){

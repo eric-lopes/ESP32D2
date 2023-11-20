@@ -118,8 +118,8 @@ void opcao(String cmd) {
   if(cmd=="vrd") {pisc=false;lamp(2);}
   if(cmd=="azl") {pisc=false;lamp(3);}
   if(cmd=="ama") {pisc=false;lamp(4);}
-  if(cmd=="rxo") {pisc=false;lamp(5);}
-  if(cmd=="cia") {pisc=false;lamp(6);}
+  if(cmd=="cia") {pisc=false;lamp(5);}
+  if(cmd=="rxo") {pisc=false;lamp(6);}
   if(cmd=="bco") {pisc=false;lamp(7);}
   if(cmd=="psc") {startpsc=millis();endpsc=millis();pisc=true;}
   if(cmd=="del") {delwifi(SD);};
