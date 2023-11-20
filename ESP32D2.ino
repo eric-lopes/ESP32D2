@@ -5,16 +5,23 @@
 #include <ESP32WebServer.h>
 #include "AUDIO.h"
 #include "SERVER.h"
-//#include "DEV.h"
 
 //Cria as Tasks para usar o dual core
 TaskHandle_t server;
 
 void allof() {
+  play=0;
   nummusica=0;
   audio.stopSong();
   pisc=false;
   lamp(0);
+  delay(500);
+  int aux=0;
+  int r=random(0,16);
+  aux=R2D2[r].length()+1;
+  char rtwo[aux];
+  R2D2[r].toCharArray(rtwo,aux);
+  audio.connecttoSD(rtwo);
 }
 
 //SETUP
@@ -38,11 +45,12 @@ void setup() {
     artoo(SD);
     int aux=0;
     int r=random(0,16);
-    aux=musica[r].length()+1;
+    aux=R2D2[r].length()+1;
     char music[aux];
-    musica[r].toCharArray(music,aux);
+    R2D2[r].toCharArray(music,aux);
     audio.connecttoSD(music);
     netread(SD);
+    pastaread(SD);
   }
   else{
     for(int i=0;i<3;i++) {
@@ -56,35 +64,33 @@ void setup() {
   //Parâmetros: (Função executada, nome do Task, Tamanho da Pilha, Parâmetros da Tarefa, Prioridade, TaskHandler criado, core)
   xTaskCreatePinnedToCore(servercode, "Server", 10000, NULL, 1, &server, 0);
   //Funções do Servidor
-  web.on("/", server_main);
-  web.on("/lamp", lamps);
-  web.on("/timer",timeroff);
+  web.on("/", index_html);
+  web.on("/abajur", abajur_html);
+  web.on("/timer",timer_html);
   web.on("/timeron", HTTP_POST, [](){  
     String argtempo = web.arg("tempo");
     int tempo = argtempo.toInt();
-    timer.stop(timerid);
-    timerid = timer.after(tempo*1000*60, allof);
-    SendHTML_Header();
-    webpage += "<h3>Abajur e Música desligarão em " + argtempo +" minuto(s). </h3>";
-    SendHTML_Content();
-    append_page_footer();
-    SendHTML_Content();
-    SendHTML_Stop();
+    timer.stop(0);
+    timer.after(tempo*1000*60, allof);
+    envia_cabeca();
+    pagina_web += "<h3>Abajur e Música desligarão em " + argtempo +" minuto(s). </h3>";
+    envia_html();
+    envia_rodape();
   });
-  web.on("/net",  newnet);
-  web.on("/netnew", HTTP_POST, [](){  
+  web.on("/net",  net_html);
+  web.on("/addnet", HTTP_POST, [](){  
     String ssid = web.arg("ssid");
     String passwd = web.arg("pass");
-    SendHTML_Header();
-    webpage += "<h3>Você cadastrou a rede: " + ssid + ". </h3>"; 
-    webpage += "<h3>Com a senha: " + passwd + ".  </h3>"; 
-    SendHTML_Content();
+    envia_cabeca();
+    pagina_web += "<h3>Você cadastrou a rede: " + ssid + ". </h3>"; 
+    pagina_web += "<h3>Com a senha: " + passwd + ".  </h3>"; 
+    envia_html();
+    readwifi(SD);
     netwrite(SD,ssid,passwd);
+    readwifi(SD);
     netread(SD);
     netstart();
-    append_page_footer();
-    SendHTML_Content();
-    SendHTML_Stop();
+    envia_rodape();
   });
   web.begin();
 }

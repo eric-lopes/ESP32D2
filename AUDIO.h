@@ -1,11 +1,12 @@
 #include "Audio.h"        //Biblioteca que toca áudio no protocolo I2S
 
-String pasta[50];           //Armazena o caminho de cada pasta de música
-int numpasta=0;           //Armazena o Número de Pastas de Música
-String musica[99];          //Armazena a lista embaralhada dos caminhos das músicas
-String playlist[99];        //Armazena a lista embaralhada dos nomes das músicas
-int nummusica=0;          //Armazena o número de músicas em uma pasta
-int play=0;               //Armazena qual música está sendo tocada no momento
+String pasta[50];       //Armazena o caminho de cada pasta de música
+int numpasta=0;         //Armazena o Número de Pastas de Música
+String musica[99];      //Armazena a lista embaralhada dos caminhos das músicas
+String playlist[99];    //Armazena a lista embaralhada dos nomes das músicas
+int nummusica=0;        //Armazena o número de músicas em uma pasta
+String R2D2[17];        //Armazena o caminho de cada som do Dróide 
+int play=0;             //Armazena qual música está sendo tocada no momento
 
 Audio audio;
 
@@ -60,8 +61,8 @@ void artoo(fs::FS &fs) {
   int count=0;
   while(file){
     if(!file.isDirectory()){
-      musica[count]="/R2D2/";
-      musica[count].concat(file.name());
+      R2D2[count]="/R2D2/";
+      R2D2[count].concat(file.name());
       count++;
     }
     file = root.openNextFile();
